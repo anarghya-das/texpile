@@ -21,7 +21,7 @@ A modern, desktop editor for LaTeX, Typst, and Markdown. For Windows, macOS, and
 
 ---
 
-![Texpile editing a LaTeX project, with the PDF preview and comments open](docs/images/overview.webp)
+![Texpile editing a LaTeX paper: an equation, a citation, the source, a Git commit and a shared session](docs/images/overview.gif)
 
 ## Visual editor
 
