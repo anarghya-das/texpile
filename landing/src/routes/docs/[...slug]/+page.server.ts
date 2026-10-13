@@ -32,6 +32,7 @@ export function load({ params }: { params: { slug: string } }) {
 		title: doc.title,
 		headTitle,
 		description: doc.description,
+		moved: doc.moved,
 		path: hrefFor(doc.slug),
 		section: top?.section ?? '',
 		sectionHref,

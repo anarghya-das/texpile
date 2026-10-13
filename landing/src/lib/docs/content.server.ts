@@ -27,6 +27,8 @@ export interface Doc {
 	section?: string;
 	/** `overview: <label>` on a chapter that is its own section: its sidebar label, or `none` to leave it out */
 	overview?: string;
+	/** `moved: <anchor> <slug#anchor>, …`: anchors whose section now lives on another page */
+	moved: Record<string, string>;
 	/** markdown after the front matter */
 	body: string;
 	children: Doc[];
@@ -60,6 +62,12 @@ function parse(file: string, src: string): Doc {
 		skipChildren: fm.pager === 'skip-children',
 		section: fm.section,
 		overview: fm.overview,
+		moved: Object.fromEntries(
+			(fm.moved ?? '')
+				.split(',')
+				.map((m) => m.trim().split(/\s+/))
+				.filter((m) => m.length === 2)
+		),
 		body,
 		children: []
 	};

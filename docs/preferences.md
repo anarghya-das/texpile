@@ -18,7 +18,7 @@ Preferences holds the settings for the whole app. Open it with Ctrl , (Cmd , on 
 | Appearance › Language                                    | Changes the interface only. Spell check follows each document's own language.                                                        |
 | Editor › Keybindings                                     | Vim and Emacs work in the source editor only.                                                                                        |
 | Editor › Justify text, Hyphenate words                   | Apply to the visual editor only. The file and the compiled document stay as they are.                                                |
-| Editor › Auto-fraction, Tab out of brackets, Matrix keys | Source editor math only. See [Snippets](snippets.md#math-typing-helpers).                                                            |
+| Editor › Auto-fraction, Tab out of brackets, Matrix keys | Source editor math only. See [Math typing helpers](typing.md#math-typing-helpers).                                                   |
 | Spelling › Check spelling and grammar                    | Off by default.                                                                                                                      |
 | Spelling › This folder › Language                        | The same choice as Spelling › Folder Language. Needs an open folder.                                                                 |
 | Spelling › Default language                              | For documents that name no language, in folders set to Automatic. English by default.                                                |

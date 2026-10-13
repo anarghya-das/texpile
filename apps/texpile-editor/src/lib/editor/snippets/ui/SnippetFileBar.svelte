@@ -37,7 +37,7 @@
 	});
 	// the bar's text is muted, its buttons are not, or they read as disabled
 	const BUTTON = 'btn btn-xs preset-outlined-surface-200-800 hover:preset-tonal text-surface-950-50 shrink-0';
-	const help = $derived(`https://texpile.com/docs/snippets${file?.kind === 'package' ? '#package-files' : ''}`);
+	const help = $derived(`https://texpile.com/docs/${file?.kind === 'package' ? 'package-files' : 'snippets'}`);
 </script>
 
 {#if file}

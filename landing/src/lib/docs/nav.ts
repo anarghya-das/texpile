@@ -56,3 +56,11 @@ export function navGroups(nav: NavNode[], overview = 'Overview'): NavGroup[] {
 		return { section: g.section, topics: [{ ...only, title, children: [] }, ...only.children] };
 	});
 }
+
+/** where an anchor of this page went, as `slug` and `#anchor` parts; null when it never moved */
+export function movedAnchor(moved: Record<string, string>, hash: string): { slug: string; hash: string } | null {
+	const to = moved[hash.replace(/^#/, '')];
+	if (!to) return null;
+	const [slug, anchor] = to.split('#');
+	return { slug, hash: anchor ? `#${anchor}` : '' };
+}

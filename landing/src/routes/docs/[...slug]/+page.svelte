@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { afterNavigate, goto } from '$app/navigation';
 	import { localizeHref } from '$lib/paraglide/runtime';
 	import ArrowLeft from '@lucide/svelte/icons/arrow-left';
 	import ArrowRight from '@lucide/svelte/icons/arrow-right';
@@ -7,11 +8,17 @@
 	import Blocks from '$lib/docs/Blocks.svelte';
 	import DocsHead from '$lib/docs/DocsHead.svelte';
 	import { ICONS } from '$lib/docs/icons';
-	import { hrefFor, navGroups, siblings } from '$lib/docs/nav';
+	import { hrefFor, movedAnchor, navGroups, siblings } from '$lib/docs/nav';
 	import SearchButton from '$lib/docs/SearchButton.svelte';
 	import Toc from '$lib/docs/Toc.svelte';
 
 	let { data } = $props();
+
+	// old links to a section that became its own page
+	afterNavigate(() => {
+		const to = movedAnchor(data.moved, location.hash);
+		if (to) void goto(localizeHref(hrefFor(to.slug)) + to.hash, { replaceState: true });
+	});
 
 	const isIndex = $derived(data.slug === '');
 	const pager = $derived(siblings(data.nav, data.slug));
@@ -25,7 +32,8 @@
 		Workflow: 'Projects and files, the PDF and the toolchain, and Git.',
 		'Review and collaboration': 'Comments, suggestions, and editing together live.',
 		'AI and integrations': 'AI agents, MCP, Zotero, and citing by DOI.',
-		Customize: 'Preferences, themes, and keyboard shortcuts.'
+		Customize: 'Preferences, themes, and keyboard shortcuts.',
+		Advanced: 'Snippets and LaTeX package files.'
 	};
 	const cards = $derived(
 		groups.slice(1).map((g) => {

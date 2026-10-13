@@ -9,7 +9,7 @@ section: Editor tips
 
 # Typing and selecting
 
-A few things the visual editor does as you type. Backspace straight after one undoes it.
+A few things the editor does as you type. In the visual editor, Backspace straight after one undoes it.
 
 ## Quotes and dashes
 
@@ -41,3 +41,13 @@ Press Tab or Ctrl Space to find a symbol by its name or by what it means, such a
 ## Delete a figure or an equation
 
 Next to a figure, the first Backspace selects it and the second deletes it. An empty equation turns red first, then goes.
+
+## Math typing helpers
+
+The source editor has three helpers for the formula around the cursor. They are off by default. Turn them on in Preferences › Editor › Source editor.
+
+| Helper              | What it does                                                                                                                                                       | Default |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------- |
+| Auto-fraction       | In LaTeX and Markdown math, `a/` becomes `\frac{a}{}` with the cursor below. `x^2/`, `\alpha/` and `(a+b)/` work the same way. A second `/` takes it back to `a/`. | Off     |
+| Tab out of brackets | In math, Tab moves past the next `)`, `]` or `}`, then out of the formula. At the start of a line Tab still indents.                                               | Off     |
+| Matrix keys         | In `matrix`, `pmatrix`, `array`, `align` and similar environments, Tab adds `&` and Shift+Enter starts a row. In a Typst `mat(…)`, they add `, ` and `; `.         | Off     |

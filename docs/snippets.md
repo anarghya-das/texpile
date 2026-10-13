@@ -1,34 +1,38 @@
 ---
 nav: Snippets
 description: Write your own snippets for LaTeX, Typst and Markdown in Texpile, and expand them as you type in math or text.
-blurb: Your own triggers, expanded as you type.
+blurb: Type at the speed of light (almost).
 icon: code
-order: 26.5
-section: Editor tips
+order: 36.5
+section: Advanced
+moved: package-files package-files, math-typing-helpers typing#math-typing-helpers
 ---
 
 # Snippets
 
-Your own triggers, expanded as you type.
+Type at the speed of light (almost).
 
-A snippet is a macro that automatically fills in text based on a trigger. For instance, you can type `dint` and Texpile will automatically fill in `\int_{0}^{1} \, \mathrm{d}x`, with Tab moving through the limits, the integrand and the variable. Snippets work in the source editor, and inside equations in the visual editor.
+A snippet is a macro that automatically fills in text based on a trigger. For instance, you can type `dint` and Texpile will automatically fill in `\int_{0}^{1} \, \mathrm{d}x`, or however it is defined. Snippets work in the source editor, and only in the equations in the visual editor.
+
+> [!WARNING]
+> Prerequisite: JSON knowledge.
 
 | Where to find it          | Path                                                                      | Note                                                |
 | ------------------------- | ------------------------------------------------------------------------- | --------------------------------------------------- |
 | This folder's snippets    | Command palette › Edit Project Snippets, or Preferences › Snippets › Edit | Opens `.texpile/snippets.json`, created if missing. |
 | Snippets for every folder | Command palette › Edit Global Snippets, or Preferences › Snippets › Edit  | Opens `snippets.json` in Texpile's own data folder. |
 
-Folder snippets are stored in the `.texpile` folder and are shared with collaborators through Git and real-time collaboration. Global snippets store your own snippets, which are not shared with anyone. If there are conflicts, Texpile prioritizes folder snippets, and both take priority over the built-in ones. A guest in a shared session gets the host's folder snippets, and can turn them off in Preferences › Snippets.
+Folder snippets are stored in the `.texpile` folder and are shared with collaborators through Git and real-time collaboration. Global snippets store your own snippets, which are not shared with anyone. If there are conflicts, Texpile follows the order of folder > global > built-in snippets. If you are a guest, you can turn off snippets via Preferences › Snippets.
 
 ![Preferences, Snippets, with a switch and an Edit button for this folder's snippets and for snippets for every folder](../landing/src/lib/assets/showcase/docs/app/preferences-snippets.png)
 
-## A snippet file
+## An example of a snippet file
 
 ```json
 {
 	"v": 1,
 	"snippets": {
-		"Definite integral": {
+		"name of the snippet": {
 			"prefix": "dint",
 			"context": "math",
 			"auto": true,
@@ -41,7 +45,7 @@ Folder snippets are stored in the `.texpile` folder and are shared with collabor
 }
 ```
 
-Texpile extends upon VS Code's snippet system, so in general your snippets from VS Code should work. You can paste a VS Code file in as it is, with its entries at the top level. Comments and trailing commas are allowed. The popup and the math search show each entry by its name.
+Texpile extends upon VS Code's snippet system and is compatible with VS Code's snippets.
 
 ### Fields
 
@@ -60,31 +64,77 @@ Texpile extends upon VS Code's snippet system, so in general your snippets from 
 | `key`         | string, such as `"Mod-Shift-o"`                                          | none                           | A keyboard shortcut that runs the snippet in the source editor. `Mod` is Ctrl, or Cmd on macOS.                                                  |
 | `disabled`    | boolean                                                                  | `false`                        | `true` turns off the global or built-in snippet of the same name.                                                                                |
 
-### Body syntax
+### Syntax and variables
 
-| Syntax                             | Result                                                                                                                                                                                          |
-| ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `$1`, `$2`                         | Places Tab moves through, in order. The same number twice is one place: it starts with the first default given for it, and what you type goes into every copy.                                  |
-| `${1:text}`                        | A place that starts with `text` selected.                                                                                                                                                       |
-| `$0`                               | Where the cursor ends. The end of the body by default.                                                                                                                                          |
-| `${1\|one,two\|}`                  | A place with a list to pick from.                                                                                                                                                               |
-| `${1:outer ${2:inner}}`            | A place inside a place. Tab visits the outer one, then the inner one. Typing over the outer one removes the inner one.                                                                          |
-| `${1/(.*)/${1:/upcase}/}`          | A copy of place 1, changed when Tab leaves the place. `/upcase`, `/downcase`, `/capitalize`, `/camelcase`, `/pascalcase`, `${1:+yes}`, `${1:-no}` and `${1:?yes:no}` work as in VS Code.        |
-| `$TM_FILENAME`, `$CURRENT_YEAR`, … | VS Code's variables: the file and its folder, the line, the date and time, random values and the comment marks. `${CLIPBOARD}` is always empty. `${NAME:text}` gives `text` when NAME is empty. |
-| `${TM_SELECTED_TEXT}`              | The selected text when the snippet runs from its `key`, with its own indentation. With several selections, each one gets its own copy.                                                          |
-| `\\$`                              | A `$` sign. LaTeX and Typst use `$` for math, so a body that inserts `$…$` needs it.                                                                                                            |
-| `\\\\\\\\`                         | The LaTeX line break `\\`.                                                                                                                                                                      |
+Every rule and variable Texpile reads. All of them go in `body`, except the two marked for a regex `prefix` and `"variables"`, which goes at the top of the file.
 
-Each body line after the first takes the indentation of the line the snippet starts on, and a tab at the start of a body line adds one indentation step. Any other `$name` becomes a place holding the name, as in VS Code. To insert `$x$`, write `\\$x\\$` in the JSON file.
+| Syntax                            | Result                                                                                                                                                             |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `$1`, `$2`                        | Places Tab moves through, in order. The same number twice is one place: it starts with the first default given for it, and what you type goes into every copy.     |
+| `${1:text}`                       | A place that starts with `text` selected.                                                                                                                          |
+| `$0`                              | Where the cursor ends. The end of the body by default.                                                                                                             |
+| `${1\|one,two\|}`                 | A place with a list to pick from.                                                                                                                                  |
+| `${1:outer ${2:inner}}`           | A place inside a place. Tab visits the outer one, then the inner one. Typing over the outer one removes the inner one.                                             |
+| `${1/regex/format/flags}`         | A copy of place 1, changed when Tab leaves the place: `regex` is matched against it and replaced with `format`. `flags` are regular expression flags, such as `g`. |
+| `$1`, `${1}` in a `format`        | What group 1 of `regex` matched.                                                                                                                                   |
+| `${1:/upcase}` in a `format`      | Group 1 changed. `/upcase`, `/downcase`, `/capitalize`, `/camelcase`, `/pascalcase`, `/snakecase` and `/kebabcase`.                                                |
+| `${1:+yes}` in a `format`         | `yes` when group 1 matched.                                                                                                                                        |
+| `${1:-no}` in a `format`          | `no` when group 1 matched nothing.                                                                                                                                 |
+| `${1:?yes:no}` in a `format`      | `yes` when group 1 matched, `no` otherwise.                                                                                                                        |
+| `$NAME`, `${NAME}`                | The value of the variable NAME, from the list below.                                                                                                               |
+| `${NAME:text}`                    | The value of NAME, or `text` when it is empty.                                                                                                                     |
+| `${NAME/regex/format/flags}`      | The value of NAME, changed as for a place.                                                                                                                         |
+| `$other`                          | Any name that is not a variable becomes a place holding the name.                                                                                                  |
+| `TM_SELECTED_TEXT`, `SELECTION`   | The selected text when the snippet runs from its `key`, with its own indentation. With several selections, each one gets its own copy.                             |
+| `TM_CURRENT_LINE`                 | The text of the line the cursor is on.                                                                                                                             |
+| `TM_CURRENT_WORD`                 | The word at the cursor.                                                                                                                                            |
+| `TM_LINE_INDEX`                   | The line number, counted from 0.                                                                                                                                   |
+| `TM_LINE_NUMBER`                  | The line number, counted from 1.                                                                                                                                   |
+| `CURSOR_INDEX`                    | With several cursors, which one this is, counted from 0.                                                                                                           |
+| `CURSOR_NUMBER`                   | With several cursors, which one this is, counted from 1.                                                                                                           |
+| `TM_FILENAME`                     | The file name, such as `main.tex`.                                                                                                                                 |
+| `TM_FILENAME_BASE`                | The file name without its extension, such as `main`.                                                                                                               |
+| `TM_FILEPATH`                     | The full path of the file.                                                                                                                                         |
+| `RELATIVE_FILEPATH`               | The path of the file inside the folder.                                                                                                                            |
+| `TM_DIRECTORY`                    | The full path of the file's folder.                                                                                                                                |
+| `TM_DIRECTORY_BASE`               | The name of the file's folder.                                                                                                                                     |
+| `WORKSPACE_NAME`                  | The name of the open folder.                                                                                                                                       |
+| `WORKSPACE_FOLDER`                | The full path of the open folder.                                                                                                                                  |
+| `CLIPBOARD`                       | Always empty.                                                                                                                                                      |
+| `CURRENT_YEAR`                    | `2026`                                                                                                                                                             |
+| `CURRENT_YEAR_SHORT`              | `26`                                                                                                                                                               |
+| `CURRENT_MONTH`                   | `01` to `12`                                                                                                                                                       |
+| `CURRENT_MONTH_NAME`              | `January`                                                                                                                                                          |
+| `CURRENT_MONTH_NAME_SHORT`        | `Jan`                                                                                                                                                              |
+| `CURRENT_DATE`                    | The day of the month, `01` to `31`.                                                                                                                                |
+| `CURRENT_DAY_NAME`                | `Monday`                                                                                                                                                           |
+| `CURRENT_DAY_NAME_SHORT`          | `Mon`                                                                                                                                                              |
+| `CURRENT_HOUR`                    | `00` to `23`                                                                                                                                                       |
+| `CURRENT_MINUTE`                  | `00` to `59`                                                                                                                                                       |
+| `CURRENT_SECOND`                  | `00` to `59`                                                                                                                                                       |
+| `CURRENT_MILLISECOND`             | `000` to `999`                                                                                                                                                     |
+| `CURRENT_SECONDS_UNIX`            | Seconds since 1 January 1970.                                                                                                                                      |
+| `CURRENT_MILLISECONDS_UNIX`       | Milliseconds since 1 January 1970.                                                                                                                                 |
+| `CURRENT_TIMEZONE_OFFSET`         | Such as `+02:00`.                                                                                                                                                  |
+| `CURRENT_TIMEZONE_NAME`           | Such as `Europe/Paris`.                                                                                                                                            |
+| `RANDOM`                          | Six random digits.                                                                                                                                                 |
+| `RANDOM_HEX`                      | Six random hexadecimal digits.                                                                                                                                     |
+| `UUID`                            | A random UUID.                                                                                                                                                     |
+| `LINE_COMMENT`                    | `%` in LaTeX, `//` in Typst. Empty in Markdown.                                                                                                                    |
+| `BLOCK_COMMENT_START`             | `/*` in Typst, `<!--` in Markdown. Empty in LaTeX.                                                                                                                 |
+| `BLOCK_COMMENT_END`               | `*/` in Typst, `-->` in Markdown. Empty in LaTeX.                                                                                                                  |
+| `[[0]]`, `[[1]]`                  | What the groups of a regex `prefix` matched. See [Regex triggers](#regex-triggers).                                                                                |
+| `${NAME}` in a regex `prefix`     | Any name from `"variables"`, as alternatives. `${GREEK}` (Greek letter names) and `${SYMBOL}` (symbol names such as `infty` and `nabla`) are built in.             |
+| `"variables": { "NAME": "a\|b" }` | A list for `${NAME}` in patterns, at the top of the file beside `"snippets"`. One text for every language, or `{ "latex", "typst", "markdown" }`.                  |
+| `\$`, `\}`, `\\`                  | A plain `$`, `}` or `\`. LaTeX and Typst use `$` for math, so a body that inserts `$…$` needs `\$`.                                                                |
+| A new line in `body`              | Takes the indentation of the line the snippet starts on. A tab at the start of a body line adds one indentation step.                                              |
 
-In the JSON file, each backslash is written twice: `"\\frac"` inserts `\frac`. A backslash in front of another backslash, a `$` or a `}` makes that character plain, as in VS Code. So two backslashes in a row take four in the body and eight in the JSON file.
-
-> [!NOTE]
-> Typst equations already use words such as `dif`, `Re` and `oo`. A Typst auto snippet with one of these as its trigger expands every time you type the word, so Texpile warns about it when it reads the file.
+> [!WARNING]
+> All fields must be JSON escaped. For instance, `"\\frac"` inserts `\frac`.
 
 ## Regex triggers
 
-With `"regex": true`, the prefix is a regular expression matched against the text you just typed, up to the cursor. `[[0]]`, `[[1]]` in the body insert what its groups matched. Regex triggers expand as you type, so they need `"auto": true`.
+With `"regex": true`, the prefix is a regular expression matched against the text you just typed, up to the cursor. `[[0]]`, `[[1]]` in the body insert what its groups matched. Regex triggers require `"auto": true`.
 
 ```json
 "Subscript": {
@@ -96,90 +146,130 @@ With `"regex": true`, the prefix is a regular expression matched against the tex
 }
 ```
 
-`${NAME}` inside a pattern stands for a list under `"variables"` at the top of the file. `${GREEK}` and `${SYMBOL}` are built in.
+Regex patterns are run per keystroke. As such, a horribly written one can freeze the editor.
 
-Texpile tests each pattern on every keystroke, and a badly written one can freeze the editor. So patterns from a folder's file wait until you press **Allow** in the bar at the top of the window, once per folder on this computer. The same goes for patterns that use the folder's variables, and the bar asks again when they change. A guest presses **Allow** for the host's patterns too.
+## Visual editor math equations
 
-## Visual editor equations
-
-In a LaTeX equation, an auto snippet expands as you type its trigger. Tab or Ctrl Space opens the math search, which lists every other math snippet. Ctrl Space inside math in the source editor opens the same search.
-
-Each empty place becomes a slot, including `$0` when it sits before the end, and Tab moves to the next slot before it opens the search. Slots start empty, and Tab visits them in the order the equation editor keeps them, so an integral's upper limit comes before its lower one. A place used twice is a slot where it first appears and its default everywhere else. Equations expand plain triggers only, so regex triggers stay as typed.
-
-In a Typst equation, a trigger made of letters expands as a whole name, so typing `point` leaves `oint` alone. The snippet goes in with its defaults filled in. A place without a default becomes an empty slot, the cursor starts in the first one, and Tab moves to the next. When you save, an empty slot inside parentheses, as in `sqrt()`, becomes `""`, and the other empty slots are dropped.
-
-`inline-math` snippets expand in inline equations only, and `display-math` ones in display equations only. Undo after an expansion gives back the trigger as typed.
-
-## Math typing helpers
-
-The source editor has three helpers for the formula around the cursor. They are separate from snippets and off by default. Turn them on in Preferences › Editor › Source editor.
-
-| Helper              | What it does                                                                                                                                                       | Default |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------- |
-| Auto-fraction       | In LaTeX and Markdown math, `a/` becomes `\frac{a}{}` with the cursor below. `x^2/`, `\alpha/` and `(a+b)/` work the same way. A second `/` takes it back to `a/`. | Off     |
-| Tab out of brackets | In math, Tab moves past the next `)`, `]` or `}`, then out of the formula. At the start of a line Tab still indents.                                               | Off     |
-| Matrix keys         | In `matrix`, `pmatrix`, `array`, `align` and similar environments, Tab adds `&` and Shift+Enter starts a row. In a Typst `mat(…)`, they add `, ` and `; `.         | Off     |
-
-## Package files
-
-Texpile knows the commands of a few hundred LaTeX packages. A package file adds the commands of any other package: they complete in documents that load it, and the visual editor keeps their arguments attached.
-
-A package file is `.texpile/packages/<name>.json` in the folder, or `packages/<name>.json` in Texpile's own data folder for every folder. It uses LaTeX Workshop's package format, so files written for LaTeX Workshop work as they are.
-
-```json
-{
-	"macros": [{ "name": "reviewnote", "arg": { "format": "[]{}", "snippet": "reviewnote[${1:who}]{${2:text}}" }, "doc": "Review note" }],
-	"envs": [{ "name": "reviewbox" }]
-}
-```
-
-To start one, open a document that loads the package and run **Save Package File for <name>** from the command palette. **Edit Package File for <name>** opens an existing one, and **Edit Global Package File for <name>** opens one in Texpile's own data folder. Texpile drafts the file from the package's `.sty` in your TeX installation. Check the draft before relying on it: it lists the commands the package defines with `\newcommand` and similar, which can include ones meant for internal use, and skips commands built some other way.
-
-Texpile also reads the arguments of an installed package's commands from its `.sty`, so the visual editor keeps them attached. Completion for those commands needs a package file.
+Auto snippets will trigger in visual editor math. Pressing Ctrl Space will open up the math search menu, in which you can search for your snippets.
 
 ## Built-in snippets
 
-In the source editor, typing `@` in math offers LaTeX Workshop's built-in snippets: `@a` for alpha, `@/` for a fraction, `@(` for a pair of brackets, and others, with Typst equivalents where Typst has the symbol. Enter inserts the one selected. To turn one off, add `{ "disabled": true }` under its name, such as `"@a"`. Equations in the visual editor find the same symbols and structures through the math search.
+Texpile has some built-in snippets:
+
+| Trigger | LaTeX              | Typst            |
+| ------- | ------------------ | ---------------- |
+| `@.`    | `\cdot`            | `dot.op`         |
+| `@*`    | `\times`           | `times`          |
+| `@/`    | `\frac{}{}`        | `()/()`          |
+| `@8`    | `\infty`           | `oo`             |
+| `@0`    | `^\circ`           | `degree`         |
+| `@6`    | `\partial`         | `partial`        |
+| `@-`    | `\bigcap`          | `inter.big`      |
+| `@=`    | `\equiv`           | `equiv`          |
+| `@<`    | `\leq`             | `lt.eq`          |
+| `@>`    | `\geq`             | `gt.eq`          |
+| `@a`    | `\alpha`           | `alpha`          |
+| `@b`    | `\beta`            | `beta`           |
+| `@g`    | `\gamma`           | `gamma`          |
+| `@d`    | `\delta`           | `delta`          |
+| `@e`    | `\epsilon`         | `epsilon.alt`    |
+| `@l`    | `\lambda`          | `lambda`         |
+| `@s`    | `\sigma`           | `sigma`          |
+| `@p`    | `\pi`              | `pi`             |
+| `@o`    | `\omega`           | `omega`          |
+| `@^`    | `\hat{}`           | `hat()`          |
+| `@_`    | `\bar{}`           | `macron()`       |
+| `@%`    | `\frac{}{}`        | `()/()`          |
+| `@@`    | `\circ`            | `compose`        |
+| `@;`    | `\dot{}`           | `dot()`          |
+| `@:`    | `\ddot{}`          | `dot.double()`   |
+| `@2`    | `\sqrt{}`          | `sqrt()`         |
+| `@I`    | `\int_{}^{}`       | `integral_()^()` |
+| `@\|`   | `\Big\|`           |                  |
+| `@+`    | `\bigcup`          | `union.big`      |
+| `@,`    | `\nonumber`        |                  |
+| `@c`    | `\chi`             | `chi`            |
+| `@ve`   | `\varepsilon`      | `epsilon`        |
+| `@f`    | `\phi`             | `phi.alt`        |
+| `@vf`   | `\varphi`          | `phi`            |
+| `@h`    | `\eta`             | `eta`            |
+| `@i`    | `\iota`            | `iota`           |
+| `@k`    | `\kappa`           | `kappa`          |
+| `@m`    | `\mu`              | `mu`             |
+| `@n`    | `\nu`              | `nu`             |
+| `@vp`   | `\varpi`           | `pi.alt`         |
+| `@q`    | `\theta`           | `theta`          |
+| `@vq`   | `\vartheta`        | `theta.alt`      |
+| `@r`    | `\rho`             | `rho`            |
+| `@vr`   | `\varrho`          | `rho.alt`        |
+| `@vs`   | `\varsigma`        | `sigma.alt`      |
+| `@t`    | `\tau`             | `tau`            |
+| `@u`    | `\upsilon`         | `upsilon`        |
+| `@&`    | `\wedge`           | `and`            |
+| `@x`    | `\xi`              | `xi`             |
+| `@y`    | `\psi`             | `psi`            |
+| `@z`    | `\zeta`            | `zeta`           |
+| `@D`    | `\Delta`           | `Delta`          |
+| `@F`    | `\Phi`             | `Phi`            |
+| `@G`    | `\Gamma`           | `Gamma`          |
+| `@Q`    | `\Theta`           | `Theta`          |
+| `@L`    | `\Lambda`          | `Lambda`         |
+| `@P`    | `\Pi`              | `Pi`             |
+| `@X`    | `\Xi`              | `Xi`             |
+| `@Y`    | `\Psi`             | `Psi`            |
+| `@S`    | `\Sigma`           | `Sigma`          |
+| `@U`    | `\Upsilon`         | `Upsilon`        |
+| `@W`    | `\Omega`           | `Omega`          |
+| `@(`    | `\left( \right)`   | `lr(( ))`        |
+| `@{`    | `\left\{ \right\}` | `lr({ })`        |
+| `@[`    | `\left[ \right]`   | `lr([ ])`        |
+
+You can turn them off by adding `"disabled": true`:
+
+```json
+{
+	"v": 1,
+	"snippets": {
+		"@a": { "disabled": true }
+	}
+}
+```
 
 ## Errors
 
-Texpile skips broken entries and loads the rest of the file. Errors show in three places: the bar above the file while it is open, its row in Preferences › Snippets, and a note in the corner when the file changes while it is closed. With several errors, the bar shows the first and **Show all** lists the rest.
+Texpile skips broken entries and loads the rest of the file.
 
-### The whole file
-
-| Message                                           | Fix                                                                                                                                              |
-| ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| The file is not valid JSON: line 5, column 24 (…) | Fix the JSON near that line and column, usually a missing comma or quotation mark. Until then, Texpile keeps using the last version that loaded. |
-| The file needs to start with { and end with }.    | Put the entries inside one pair of braces.                                                                                                       |
-| Unsupported file version ("v": 2).                | A newer Texpile wrote the file. Update Texpile, or set `"v": 1`.                                                                                 |
-
-### One entry
-
-| Message                                                          | Fix                                                                                   |
-| ---------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| Each entry needs to be in { }, like "Name": { … }.               | Write the entry as a name followed by its fields in braces.                           |
-| Has no "body", the text it inserts.                              | Add a `body`.                                                                         |
-| Has no "prefix", the text you type to use it.                    | Add a `prefix` or a `key`.                                                            |
-| "body" has "…", which is not a language.                         | Use `latex`, `typst` or `markdown` as the names inside `body`.                        |
-| "…" needs to be …                                                | The field has the wrong type, such as a number in quotes. The message names the type. |
-| The "prefix" pattern is not a valid regular expression (…).      | Fix the pattern. The text in brackets says what is wrong.                             |
-| The pattern uses ${NAME}, but "variables" has no NAME for latex. | Add the list under `variables`, or take it out of the pattern.                        |
-| A "regex" pattern needs "auto": true as well.                    | Add `"auto": true`.                                                                   |
+| Message                                                                                                       | Fix                                                                                                                                              |
+| ------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| The file is not valid JSON: line 5, column 24 (…)                                                             | Fix the JSON near that line and column, usually a missing comma or quotation mark. Until then, Texpile keeps using the last version that loaded. |
+| The file needs to start with { and end with }.                                                                | Put the entries inside one pair of braces.                                                                                                       |
+| Unsupported file version ("v": 2).                                                                            | A newer Texpile wrote the file. Update Texpile, or set `"v": 1`.                                                                                 |
+| Each entry needs to be in { }, like "Name": { "prefix": "ff", "body": "text" }.                               | Write the entry as a name followed by its fields in braces.                                                                                      |
+| Has no "body", the text it inserts.                                                                           | Add a `body`.                                                                                                                                    |
+| "body" needs to be text in quotes, or one text each for "latex", "typst" and "markdown".                      | Write `body` as a string, or as an object of strings.                                                                                            |
+| "body" has "…", which is not a language. Use "latex", "typst" or "markdown".                                  | Use `latex`, `typst` or `markdown` as the names inside `body`.                                                                                   |
+| The … "body" needs to be text in quotes.                                                                      | Write that language's body as a string.                                                                                                          |
+| Has no "prefix", the text you type to use it.                                                                 | Add a `prefix` or a `key`.                                                                                                                       |
+| "prefix" needs to be text in quotes, or a list of them in [ ].                                                | Write `prefix` as a string or a string[].                                                                                                        |
+| "scope" needs to be text naming languages, like "latex,typst".                                                | Write `scope` as a string.                                                                                                                       |
+| "context" needs to be one of "math", "inline-math", "display-math", "text", "code", "any".                    | Use one of the listed values.                                                                                                                    |
+| "…" needs to be true or false, without quotes.                                                                | Write `auto`, `word`, `regex` or `disabled` as `true` or `false`.                                                                                |
+| "flags" can only hold i (ignore case) and u (Unicode).                                                        | Remove the other letters.                                                                                                                        |
+| "priority" needs to be a number, without quotes.                                                              | Remove the quotes.                                                                                                                               |
+| "key" needs to be text, like "Mod-Shift-o".                                                                   | Write `key` as a string.                                                                                                                         |
+| "description" needs to be text in quotes.                                                                     | Write `description` as a string.                                                                                                                 |
+| The "prefix" pattern is not a valid regular expression (…).                                                   | Fix the pattern. The text in brackets says what is wrong.                                                                                        |
+| A "regex" pattern needs "auto": true as well, because patterns only expand as you type.                       | Add `"auto": true`.                                                                                                                              |
+| The pattern uses ${NAME}, but "variables" has no NAME for latex. Add it there, or take it out of the pattern. | Add the list under `variables`, or take it out of the pattern.                                                                                   |
+| Needs to be in { }, with a named list in each entry.                                                          | Write `variables` as an object of named lists.                                                                                                   |
+| Needs to be text, or one text per language.                                                                   | Write the variable as a string, or as an object of strings.                                                                                      |
 
 ### Warnings
 
-A snippet with a warning still loads and works, probably differently from what you meant.
+A snippet with a warning still loads and works, but most likely will not work right.
 
-| Message                                                                                                        | Fix                                                                          |
-| -------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| "dif" is already a word in Typst math, so with this snippet a plain dif can no longer be typed in an equation. | Pick another trigger, or limit the snippet to LaTeX with `"scope": "latex"`. |
+| Message                                                                                                                              | Fix                                                                          |
+| ------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------- |
+| "dif" is already a word in Typst math, so with this snippet a plain dif can no longer be typed in an equation. Pick another trigger. | Pick another trigger, or limit the snippet to LaTeX with `"scope": "latex"`. |
 
-### A package file
-
-| Message                                                                     | Fix                                                       |
-| --------------------------------------------------------------------------- | --------------------------------------------------------- |
-| The file is not valid JSON: line 5, column 24 (…)                           | Fix the JSON near that line and column.                   |
-| The file needs to start with { and end with }.                              | Put the contents inside one pair of braces.               |
-| 2 of its entries are not in the package file format, so they were left out. | Check those entries against LaTeX Workshop's file format. |
-
-[Typing and selecting](typing.md) [Preferences](preferences.md)
+[LaTeX package files](package-files.md) [Preferences](preferences.md)
