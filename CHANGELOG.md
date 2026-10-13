@@ -5,6 +5,8 @@ Release notes for Texpile Desktop. Add notes under `## [Unreleased]` as you work
 
 ## [Unreleased]
 
+## [1.5.0] - 2026-10-13
+
 - feat: snippets (by @louisqli)
 - feat: optional built-in helpers such as auto fractions (by @louisqli)
 - feat: improved math search in equations (Ctrl+Space in a math field) (by @louisqli)
