@@ -35,6 +35,7 @@ export type Block =
 export interface TocItem {
 	id: string;
 	text: string;
+	level: 2 | 3;
 }
 
 /** one page in the search index */

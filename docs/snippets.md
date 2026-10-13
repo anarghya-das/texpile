@@ -47,7 +47,19 @@ Folder snippets are stored in the `.texpile` folder and are shared with collabor
 
 Texpile extends upon VS Code's snippet system and is compatible with VS Code's snippets.
 
-### Fields
+### The file
+
+| Field       | Type                                                                                   | Default | Description                                                                                                             |
+| ----------- | -------------------------------------------------------------------------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `v`         | `1`                                                                                    | `1`     | The file version.                                                                                                       |
+| `snippets`  | `{ "snippet name": snippet }`                                                          | none    | Required. Every [snippet](#a-snippet), under its name. The popup and the math search show each snippet by its name.     |
+| `variables` | `{ "NAME": string }`, or one string per language as `{ "latex", "typst", "markdown" }` | none    | Lists for `${NAME}` in regex triggers, written as alternatives such as `"a\|b"`. See [Regex triggers](#regex-triggers). |
+
+A file from VS Code, with its snippets at the top level and no `snippets` field, works as it is. Comments and trailing commas are allowed.
+
+### A snippet
+
+One item in `snippets`.
 
 | Field         | Type                                                                     | Default                        | Description                                                                                                                                      |
 | ------------- | ------------------------------------------------------------------------ | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -66,68 +78,67 @@ Texpile extends upon VS Code's snippet system and is compatible with VS Code's s
 
 ### Syntax and variables
 
-Every rule and variable Texpile reads. All of them go in `body`, except the two marked for a regex `prefix` and `"variables"`, which goes at the top of the file.
+Every rule and variable Texpile reads. All of them go in a snippet's `body`, except the one marked for a regex `prefix`.
 
-| Syntax                            | Result                                                                                                                                                             |
-| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `$1`, `$2`                        | Places Tab moves through, in order. The same number twice is one place: it starts with the first default given for it, and what you type goes into every copy.     |
-| `${1:text}`                       | A place that starts with `text` selected.                                                                                                                          |
-| `$0`                              | Where the cursor ends. The end of the body by default.                                                                                                             |
-| `${1\|one,two\|}`                 | A place with a list to pick from.                                                                                                                                  |
-| `${1:outer ${2:inner}}`           | A place inside a place. Tab visits the outer one, then the inner one. Typing over the outer one removes the inner one.                                             |
-| `${1/regex/format/flags}`         | A copy of place 1, changed when Tab leaves the place: `regex` is matched against it and replaced with `format`. `flags` are regular expression flags, such as `g`. |
-| `$1`, `${1}` in a `format`        | What group 1 of `regex` matched.                                                                                                                                   |
-| `${1:/upcase}` in a `format`      | Group 1 changed. `/upcase`, `/downcase`, `/capitalize`, `/camelcase`, `/pascalcase`, `/snakecase` and `/kebabcase`.                                                |
-| `${1:+yes}` in a `format`         | `yes` when group 1 matched.                                                                                                                                        |
-| `${1:-no}` in a `format`          | `no` when group 1 matched nothing.                                                                                                                                 |
-| `${1:?yes:no}` in a `format`      | `yes` when group 1 matched, `no` otherwise.                                                                                                                        |
-| `$NAME`, `${NAME}`                | The value of the variable NAME, from the list below.                                                                                                               |
-| `${NAME:text}`                    | The value of NAME, or `text` when it is empty.                                                                                                                     |
-| `${NAME/regex/format/flags}`      | The value of NAME, changed as for a place.                                                                                                                         |
-| `$other`                          | Any name that is not a variable becomes a place holding the name.                                                                                                  |
-| `TM_SELECTED_TEXT`, `SELECTION`   | The selected text when the snippet runs from its `key`, with its own indentation. With several selections, each one gets its own copy.                             |
-| `TM_CURRENT_LINE`                 | The text of the line the cursor is on.                                                                                                                             |
-| `TM_CURRENT_WORD`                 | The word at the cursor.                                                                                                                                            |
-| `TM_LINE_INDEX`                   | The line number, counted from 0.                                                                                                                                   |
-| `TM_LINE_NUMBER`                  | The line number, counted from 1.                                                                                                                                   |
-| `CURSOR_INDEX`                    | With several cursors, which one this is, counted from 0.                                                                                                           |
-| `CURSOR_NUMBER`                   | With several cursors, which one this is, counted from 1.                                                                                                           |
-| `TM_FILENAME`                     | The file name, such as `main.tex`.                                                                                                                                 |
-| `TM_FILENAME_BASE`                | The file name without its extension, such as `main`.                                                                                                               |
-| `TM_FILEPATH`                     | The full path of the file.                                                                                                                                         |
-| `RELATIVE_FILEPATH`               | The path of the file inside the folder.                                                                                                                            |
-| `TM_DIRECTORY`                    | The full path of the file's folder.                                                                                                                                |
-| `TM_DIRECTORY_BASE`               | The name of the file's folder.                                                                                                                                     |
-| `WORKSPACE_NAME`                  | The name of the open folder.                                                                                                                                       |
-| `WORKSPACE_FOLDER`                | The full path of the open folder.                                                                                                                                  |
-| `CLIPBOARD`                       | Always empty.                                                                                                                                                      |
-| `CURRENT_YEAR`                    | `2026`                                                                                                                                                             |
-| `CURRENT_YEAR_SHORT`              | `26`                                                                                                                                                               |
-| `CURRENT_MONTH`                   | `01` to `12`                                                                                                                                                       |
-| `CURRENT_MONTH_NAME`              | `January`                                                                                                                                                          |
-| `CURRENT_MONTH_NAME_SHORT`        | `Jan`                                                                                                                                                              |
-| `CURRENT_DATE`                    | The day of the month, `01` to `31`.                                                                                                                                |
-| `CURRENT_DAY_NAME`                | `Monday`                                                                                                                                                           |
-| `CURRENT_DAY_NAME_SHORT`          | `Mon`                                                                                                                                                              |
-| `CURRENT_HOUR`                    | `00` to `23`                                                                                                                                                       |
-| `CURRENT_MINUTE`                  | `00` to `59`                                                                                                                                                       |
-| `CURRENT_SECOND`                  | `00` to `59`                                                                                                                                                       |
-| `CURRENT_MILLISECOND`             | `000` to `999`                                                                                                                                                     |
-| `CURRENT_SECONDS_UNIX`            | Seconds since 1 January 1970.                                                                                                                                      |
-| `CURRENT_MILLISECONDS_UNIX`       | Milliseconds since 1 January 1970.                                                                                                                                 |
-| `CURRENT_TIMEZONE_OFFSET`         | Such as `+02:00`.                                                                                                                                                  |
-| `CURRENT_TIMEZONE_NAME`           | Such as `Europe/Paris`.                                                                                                                                            |
-| `RANDOM`                          | Six random digits.                                                                                                                                                 |
-| `RANDOM_HEX`                      | Six random hexadecimal digits.                                                                                                                                     |
-| `UUID`                            | A random UUID.                                                                                                                                                     |
-| `LINE_COMMENT`                    | `%` in LaTeX, `//` in Typst. Empty in Markdown.                                                                                                                    |
-| `BLOCK_COMMENT_START`             | `/*` in Typst, `<!--` in Markdown. Empty in LaTeX.                                                                                                                 |
-| `BLOCK_COMMENT_END`               | `*/` in Typst, `-->` in Markdown. Empty in LaTeX.                                                                                                                  |
-| `[[0]]`, `[[1]]`                  | What the groups of a regex `prefix` matched. See [Regex triggers](#regex-triggers).                                                                                |
-| `${NAME}` in a regex `prefix`     | Any name from `"variables"`, as alternatives. `${GREEK}` (Greek letter names) and `${SYMBOL}` (symbol names such as `infty` and `nabla`) are built in.             |
-| `"variables": { "NAME": "a\|b" }` | A list for `${NAME}` in patterns, at the top of the file beside `"snippets"`. One text for every language, or `{ "latex", "typst", "markdown" }`.                  |
-| `\$`, `\}`, `\\`                  | A plain `$`, `}` or `\`. LaTeX and Typst use `$` for math, so a body that inserts `$…$` needs `\$`.                                                                |
-| A new line in `body`              | Takes the indentation of the line the snippet starts on. A tab at the start of a body line adds one indentation step.                                              |
+| Syntax                          | Result                                                                                                                                                             |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `$1`, `$2`                      | Places Tab moves through, in order. The same number twice is one place: it starts with the first default given for it, and what you type goes into every copy.     |
+| `${1:text}`                     | A place that starts with `text` selected.                                                                                                                          |
+| `$0`                            | Where the cursor ends. The end of the body by default.                                                                                                             |
+| `${1\|one,two\|}`               | A place with a list to pick from.                                                                                                                                  |
+| `${1:outer ${2:inner}}`         | A place inside a place. Tab visits the outer one, then the inner one. Typing over the outer one removes the inner one.                                             |
+| `${1/regex/format/flags}`       | A copy of place 1, changed when Tab leaves the place: `regex` is matched against it and replaced with `format`. `flags` are regular expression flags, such as `g`. |
+| `$1`, `${1}` in a `format`      | What group 1 of `regex` matched.                                                                                                                                   |
+| `${1:/upcase}` in a `format`    | Group 1 changed. `/upcase`, `/downcase`, `/capitalize`, `/camelcase`, `/pascalcase`, `/snakecase` and `/kebabcase`.                                                |
+| `${1:+yes}` in a `format`       | `yes` when group 1 matched.                                                                                                                                        |
+| `${1:-no}` in a `format`        | `no` when group 1 matched nothing.                                                                                                                                 |
+| `${1:?yes:no}` in a `format`    | `yes` when group 1 matched, `no` otherwise.                                                                                                                        |
+| `$NAME`, `${NAME}`              | The value of the variable NAME, from the list below.                                                                                                               |
+| `${NAME:text}`                  | The value of NAME, or `text` when it is empty.                                                                                                                     |
+| `${NAME/regex/format/flags}`    | The value of NAME, changed as for a place.                                                                                                                         |
+| `$other`                        | Any name that is not a variable becomes a place holding the name.                                                                                                  |
+| `TM_SELECTED_TEXT`, `SELECTION` | The selected text when the snippet runs from its `key`, with its own indentation. With several selections, each one gets its own copy.                             |
+| `TM_CURRENT_LINE`               | The text of the line the cursor is on.                                                                                                                             |
+| `TM_CURRENT_WORD`               | The word at the cursor.                                                                                                                                            |
+| `TM_LINE_INDEX`                 | The line number, counted from 0.                                                                                                                                   |
+| `TM_LINE_NUMBER`                | The line number, counted from 1.                                                                                                                                   |
+| `CURSOR_INDEX`                  | With several cursors, which one this is, counted from 0.                                                                                                           |
+| `CURSOR_NUMBER`                 | With several cursors, which one this is, counted from 1.                                                                                                           |
+| `TM_FILENAME`                   | The file name, such as `main.tex`.                                                                                                                                 |
+| `TM_FILENAME_BASE`              | The file name without its extension, such as `main`.                                                                                                               |
+| `TM_FILEPATH`                   | The full path of the file.                                                                                                                                         |
+| `RELATIVE_FILEPATH`             | The path of the file inside the folder.                                                                                                                            |
+| `TM_DIRECTORY`                  | The full path of the file's folder.                                                                                                                                |
+| `TM_DIRECTORY_BASE`             | The name of the file's folder.                                                                                                                                     |
+| `WORKSPACE_NAME`                | The name of the open folder.                                                                                                                                       |
+| `WORKSPACE_FOLDER`              | The full path of the open folder.                                                                                                                                  |
+| `CLIPBOARD`                     | Always empty.                                                                                                                                                      |
+| `CURRENT_YEAR`                  | `2026`                                                                                                                                                             |
+| `CURRENT_YEAR_SHORT`            | `26`                                                                                                                                                               |
+| `CURRENT_MONTH`                 | `01` to `12`                                                                                                                                                       |
+| `CURRENT_MONTH_NAME`            | `January`                                                                                                                                                          |
+| `CURRENT_MONTH_NAME_SHORT`      | `Jan`                                                                                                                                                              |
+| `CURRENT_DATE`                  | The day of the month, `01` to `31`.                                                                                                                                |
+| `CURRENT_DAY_NAME`              | `Monday`                                                                                                                                                           |
+| `CURRENT_DAY_NAME_SHORT`        | `Mon`                                                                                                                                                              |
+| `CURRENT_HOUR`                  | `00` to `23`                                                                                                                                                       |
+| `CURRENT_MINUTE`                | `00` to `59`                                                                                                                                                       |
+| `CURRENT_SECOND`                | `00` to `59`                                                                                                                                                       |
+| `CURRENT_MILLISECOND`           | `000` to `999`                                                                                                                                                     |
+| `CURRENT_SECONDS_UNIX`          | Seconds since 1 January 1970.                                                                                                                                      |
+| `CURRENT_MILLISECONDS_UNIX`     | Milliseconds since 1 January 1970.                                                                                                                                 |
+| `CURRENT_TIMEZONE_OFFSET`       | Such as `+02:00`.                                                                                                                                                  |
+| `CURRENT_TIMEZONE_NAME`         | Such as `Europe/Paris`.                                                                                                                                            |
+| `RANDOM`                        | Six random digits.                                                                                                                                                 |
+| `RANDOM_HEX`                    | Six random hexadecimal digits.                                                                                                                                     |
+| `UUID`                          | A random UUID.                                                                                                                                                     |
+| `LINE_COMMENT`                  | `%` in LaTeX, `//` in Typst. Empty in Markdown.                                                                                                                    |
+| `BLOCK_COMMENT_START`           | `/*` in Typst, `<!--` in Markdown. Empty in LaTeX.                                                                                                                 |
+| `BLOCK_COMMENT_END`             | `*/` in Typst, `-->` in Markdown. Empty in LaTeX.                                                                                                                  |
+| `[[0]]`, `[[1]]`                | What the groups of a regex `prefix` matched. See [Regex triggers](#regex-triggers).                                                                                |
+| `${NAME}` in a regex `prefix`   | Any name from `"variables"`, as alternatives. `${GREEK}` (Greek letter names) and `${SYMBOL}` (symbol names such as `infty` and `nabla`) are built in.             |
+| `\$`, `\}`, `\\`                | A plain `$`, `}` or `\`. LaTeX and Typst use `$` for math, so a body that inserts `$…$` needs `\$`.                                                                |
+| A new line in `body`            | Takes the indentation of the line the snippet starts on. A tab at the start of a body line adds one indentation step.                                              |
 
 > [!WARNING]
 > All fields must be JSON escaped. For instance, `"\\frac"` inserts `\frac`.

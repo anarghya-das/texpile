@@ -10,6 +10,7 @@
 	import { ICONS } from '$lib/docs/icons';
 	import { hrefFor, movedAnchor, navGroups, siblings } from '$lib/docs/nav';
 	import SearchButton from '$lib/docs/SearchButton.svelte';
+	import SupportLinks from '$lib/docs/SupportLinks.svelte';
 	import Toc from '$lib/docs/Toc.svelte';
 
 	let { data } = $props();
@@ -194,6 +195,7 @@
 		<aside class="hidden xl:block">
 			<div class="docs-scroll sticky top-[calc(4rem+1px+2rem)] max-h-[calc(100vh-7rem)] overflow-y-auto">
 				<Toc items={data.toc} />
+				<SupportLinks />
 			</div>
 		</aside>
 	</div>

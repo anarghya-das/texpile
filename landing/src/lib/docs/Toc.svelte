@@ -1,5 +1,5 @@
 <script lang="ts">
-	// "On this page": the ## headings, with the one being read highlighted.
+	// "On this page": the ## and ### headings, with the one being read highlighted.
 	import type { TocItem } from './blocks';
 
 	let { items }: { items: TocItem[] } = $props();
@@ -30,7 +30,7 @@
 				<li>
 					<a
 						href="#{item.id}"
-						class="-ml-px block border-l py-1 pl-3 leading-snug transition-colors {current === item.id
+						class="-ml-px block border-l py-1 {item.level === 3 ? 'pl-6' : 'pl-3'} leading-snug transition-colors {current === item.id
 							? 'border-primary-500 text-primary-ink'
 							: 'text-muted hover:text-surface-900 border-transparent'}"
 					>

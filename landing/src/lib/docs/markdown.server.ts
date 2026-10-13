@@ -205,17 +205,17 @@ function special(doc: Doc, tokens: Token[], env: Env): Block | null {
 	return null;
 }
 
-/** the page's ## headings, for "On this page" and search */
+/** the page's ## and ### headings, for "On this page" and search */
 function tocOf(tokens: Token[]): TocItem[] {
 	const out: TocItem[] = [];
 	for (let i = 0; i < tokens.length; i++) {
-		if (tokens[i].type === 'heading_open' && tokens[i].tag === 'h2')
-			out.push({ id: attr(tokens[i], 'id'), text: text(tokens[i + 1].children ?? []) });
+		if (tokens[i].type === 'heading_open' && (tokens[i].tag === 'h2' || tokens[i].tag === 'h3'))
+			out.push({ id: attr(tokens[i], 'id'), text: text(tokens[i + 1].children ?? []), level: tokens[i].tag === 'h3' ? 3 : 2 });
 	}
 	return out;
 }
 
-/** the ## headings alone, without rendering the page */
+/** the headings alone, without rendering the page */
 export const headingsOf = (doc: Doc) => tocOf(md.parse(doc.body, { doc }));
 
 /** the page's lead (the paragraph under the heading), everything after it, and its ## headings */
