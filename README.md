@@ -16,32 +16,54 @@ A modern, desktop editor for LaTeX, Typst, and Markdown. For Windows, macOS, and
 
 </div>
 
-> [!NOTE]
-> Want to help us verify and translate the app? Check [Translation.md](Translation.md) and open an [issue](https://github.com/texpile/texpile/issues/new).
-
 ---
 
 ![Texpile editing a LaTeX paper: an equation, a citation, the source, a Git commit and a shared session](docs/images/overview.gif)
 
-## Visual editor
+## Why Texpile
 
-Texpile's visual editor supports LaTeX, Typst, and Markdown. Texpile stores them as plain `.tex`, `.typ`, and `.md` files, respectively. Texpile's visual editor covers complicated elements such as citations, cell-merging tables, multirow equations, and more.
+### Visual editor
 
-![The Texpile visual editor](docs/images/visual-editing.webp)
+Texpile has the most complete visual editor coverage for LaTeX and Typst.
 
-## Live preview for LaTeX
+- Supports custom macros, multiline equations, commands, cell-merging tables and images.
+- Uses Knuth-Plass line breaking.
+- Opens .tex, .typ and .md files directly and stores them in those file formats.
 
-Type in source view and the page re-typesets with your own LuaLaTeX. Many updates, such as text changes, are rendered instantly.
+<table>
+  <tr>
+    <th>Visual</th>
+    <th>Source</th>
+  </tr>
+  <tr>
+    <td><img alt="A LaTeX paper in the visual editor" src="landing/src/lib/assets/showcase/editor-latex-visual.webp" /></td>
+    <td><img alt="The same paper in the source editor" src="landing/src/lib/assets/showcase/editor-latex-source.webp" /></td>
+  </tr>
+</table>
+
+### IntelliSense
+
+- Texpile's LaTeX IntelliSense data covers ~95% of the LaTeX packages on CTAN (over 5,700 packages and 680 classes), and can suggest and detect certain errors instantly.
+- It is project aware: it parses LaTeX aux files and covers refactoring, custom macro detection and more.
+- For Typst, Texpile uses tinymist for IntelliSense.
+
+### Live preview
+
+- Texpile hooks onto your LuaLaTeX engine directly and can often render LaTeX document changes in under 40ms.
+- Texpile supports Typst's instant live preview.
 
 ![The live preview typesetting a paragraph as it is typed](docs/images/live-preview.gif)
 
-## Shared sessions (real time collaboration)
+### Shared sessions (real time collaboration)
 
-Share a folder for real time editing, no account needed. Start a session (File > Shared Session) to get a code; others join with it from the home screen and edit alongside you, in the visual editor or in source. Everything is end to end encrypted, so the relay server only forwards data it cannot read.
+Texpile supports real time collaboration (like VS Code Live Share), tuned specifically for LaTeX and Typst workflows, with end to end encryption. No account is needed. Start a session from File › Shared Session.
 
-## Comments
+### Comments and suggestions
 
-Texpile supports adding comments, and you can add them in both the visual and the source editor.
+You can add visual comments and suggestions in Texpile, like in a word processor.
+
+> [!NOTE]
+> This list covers what sets Texpile apart from other LaTeX and Typst editors. See [texpile.com](https://texpile.com) for every feature, including AI integrations.
 
 ## Installation
 
@@ -54,13 +76,19 @@ Editing works out of the box; the compiler is only needed to produce a PDF. Mark
 
 ## Privacy
 
-Your documents stay on your disk. The app's only background network traffic is the update check and Autofetch in a Git folder, which you can each turn off in Preferences. Installing tinymist from Texpile downloads it from GitHub when you click Install tinymist, and the Typst template gallery reads packages.typst.org only while it is open. Shared sessions are end to end encrypted, so Texpile can never see your data.
+Texpile works fully offline. Its only connections to Texpile are the update check and real time collaboration, which is end to end encrypted. Texpile physically cannot see your documents, even if we wanted to.
+
+You can also self host your own real time collaboration relay.
 
 ## Community
 
-Questions or feedback? Join the [Discord](https://discord.com/invite/7wanVzCBWf). Found a bug? [Open an issue](https://github.com/texpile/texpile/issues/new/choose), or use Help › Report a Problem in the app, which fills in your version and system.
+Questions or feedback? Join the [Discord](https://discord.com/invite/7wanVzCBWf). Found a bug? [Open an issue](https://github.com/texpile/texpile/issues/new/choose).
 
-Security issues: email [support@texpile.com](mailto:support@texpile.com) instead of opening a public issue.
+For security issues, please email [support@texpile.com](mailto:support@texpile.com) directly.
+
+## Contributing
+
+Texpile would not be possible without our contributors and sponsors. See [CONTRIBUTING.md](CONTRIBUTING.md). To help translate the app, see [Translation.md](Translation.md).
 
 ## Acknowledgements
 
@@ -72,3 +100,5 @@ Texpile builds on pdf.js, Typst, tinymist and others; see [ACKNOWLEDGEMENTS.md](
 
 The Texpile name and logo are trademarks of the Texpile project and are not covered by the code
 license; see [TRADEMARK.md](TRADEMARK.md).
+
+We also ask that unofficial Texpile builds do not use our hosted relay at collab.texpile.com for real time collaboration.

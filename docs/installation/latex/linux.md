@@ -8,19 +8,7 @@ order: 3
 
 # LaTeX on Linux
 
-TeX Live from apt, or the current release from upstream.
-
-## With apt
-
-```bash
-sudo apt install texlive-full
-```
-
-A smaller set that builds most papers (add `biber` for biblatex):
-
-```bash
-sudo apt install texlive-latex-recommended texlive-latex-extra latexmk
-```
+Installing from upstream is recommended since the TeX distribution in your distro's repositories might be outdated.
 
 ## From upstream
 
@@ -34,4 +22,14 @@ cd install-tl-2*
 perl ./install-tl --no-interaction
 ```
 
-For a smaller install, end with `--scheme=small --no-doc-install --no-src-install`.
+## With apt
+
+```bash
+sudo apt install texlive-full
+```
+
+A smaller set that should be enough for most papers:
+
+```bash
+sudo apt install texlive-latex-recommended texlive-latex-extra latexmk biber
+```

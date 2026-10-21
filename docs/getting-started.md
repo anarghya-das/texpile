@@ -8,11 +8,11 @@ section: Get started
 
 # Getting started
 
-Open a folder, start a document from a template, and compile it to a PDF.
+Different from many online LaTeX or Typst editors, Texpile requires you to open a folder.
 
 ## Open a folder
 
-Click **Open Folder…** on the start screen, or press Ctrl O (Cmd O on macOS). **New here? Try the tutorial** builds a multi-file example in an empty folder you pick.
+Click **Open Folder…** on the start screen. If you have no existing projects, create an empty folder in your system's file explorer (Finder) first and then open it.
 
 ![The start screen](../landing/src/lib/assets/showcase/docs/app/start-screen-open.png)
 

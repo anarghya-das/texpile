@@ -8,6 +8,8 @@ order: 1
 
 # LaTeX
 
+Texpile recommends using TeX Live and MacTeX. However, other distros such as MiKTeX will work fine.
+
 Install a full TeX distribution to compile LaTeX:
 
 - [Windows](windows.md): TeX Live or MiKTeX.

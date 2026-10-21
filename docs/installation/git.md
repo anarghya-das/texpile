@@ -20,4 +20,6 @@ Install git to use Source Control and to clone projects.
 | Fedora         | `sudo dnf install git`                           |
 | Arch           | `sudo pacman -S git`                             |
 
-On Windows, the installer from [git-scm.com](https://git-scm.com/download/win) works too. Then click **Check Again**.
+On Windows, you can also use the installer from [git-scm.com](https://git-scm.com/download/win).
+
+After you finish installing, click **Check Again**.
