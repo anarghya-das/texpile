@@ -241,6 +241,20 @@ test.describe('recent folders', () => {
 	});
 });
 
+test.describe('a recent folder shortcut', () => {
+	const [first, second] = makeFolders('first-paper', 'second-paper');
+	const texpile = useTexpile({ startScreen: true });
+
+	test('Ctrl and the row number opens that folder', async () => {
+		const { page } = texpile();
+		await seedRecents(page, [first, second]);
+		await expect(page.locator('[data-recent-row]').nth(1)).toContainText('Ctrl+2');
+		await page.keyboard.press('Control+2');
+		await expect(editor(page)).toBeVisible({ timeout: 30_000 });
+		await expect.poll(() => storedRecents(page)).toEqual([second, first]);
+	});
+});
+
 test.describe('a long history', () => {
 	const folders = makeFolders('p1', 'p2', 'p3', 'p4', 'p5', 'p6', 'p7', 'p8');
 	const texpile = useTexpile({ startScreen: true });

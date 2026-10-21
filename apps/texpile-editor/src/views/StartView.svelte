@@ -44,6 +44,7 @@
 
 	// every entry on this screen is the same row: muted icon, label, optional shortcut on the right
 	const rowClass = 'hover:preset-tonal rounded-base flex w-full items-center gap-2.5 px-2 py-1.5 text-left text-sm disabled:opacity-50';
+	const shortcutClass = 'text-faint ml-auto shrink-0 pl-4 text-xs';
 
 	// WorkspaceView is route-split (App.svelte); kick its chunk off as soon as an open begins so
 	// it streams while the folder scans. failures are non-fatal here: App's own loader retries
@@ -102,6 +103,13 @@
 		} else if (e.key.toLowerCase() === 'o' && !busy) {
 			e.preventDefault();
 			void openFolder();
+		} else {
+			// the key's place, so Ctrl+1 is the same key on AZERTY, where it types &
+			const digit = /^Digit([1-9])$/.exec(e.code);
+			const folder = digit && visibleRecents[Number(digit[1]) - 1];
+			if (!folder || busy) return;
+			e.preventDefault();
+			void openFolder(folder);
 		}
 	}
 </script>
@@ -125,6 +133,7 @@
 			<button class={rowClass} onclick={() => openFolder()} disabled={busy}>
 				{#if busy}<Loader2 class="text-muted size-4 shrink-0 animate-spin" />{:else}<FolderOpen class="text-muted size-4 shrink-0" />{/if}
 				<span>{m.start_open_folder()}</span>
+				<span class={shortcutClass}>{combo('O')}</span>
 			</button>
 			{#if canClone()}
 				<button class={rowClass} onclick={cloneRepository} disabled={busy}>
@@ -140,12 +149,13 @@
 				<button class={rowClass} onclick={openNewWindow}>
 					<AppWindow class="text-muted size-4 shrink-0" />
 					<span>{m.start_new_window()}</span>
-					<span class="text-faint ml-auto shrink-0 pl-4 text-xs">{combo('N', { shift: true })}</span>
+					<span class={shortcutClass}>{combo('N', { shift: true })}</span>
 				</button>
 			{/if}
 			<button class={rowClass} onclick={showPrefs}>
 				<Settings class="text-muted size-4 shrink-0" />
 				<span>{m.menubar_preferences()}</span>
+				<span class={shortcutClass}>{combo(',')}</span>
 			</button>
 
 			{#if error}
@@ -158,7 +168,7 @@
 						<span class="text-muted shrink-0 text-xs font-semibold tracking-wider uppercase">{m.start_recent_heading()}</span>
 						<span class="border-surface-200-800 h-px flex-1 border-t"></span>
 					</div>
-					{#each visibleRecents as folder (folder)}
+					{#each visibleRecents as folder, i (folder)}
 						<!-- min-w-0 on the row and the path: flex items default to min-width:auto, so
 					     without it `truncate` never engages and long paths overflow -->
 						<button class="{rowClass} group min-w-0" data-recent-row onclick={() => openFolder(folder)} disabled={busy} use:tip={folder}>
@@ -169,6 +179,7 @@
 								<span class="max-w-[45%] shrink-0 truncate group-hover:underline">{basename(folder)}</span>
 								<span class="text-faint min-w-0 truncate text-xs">{folder}</span>
 							</span>
+							<span class={shortcutClass}>{combo(String(i + 1))}</span>
 						</button>
 					{/each}
 					{#if recentFolders.current.length > visibleRecents.length}
