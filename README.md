@@ -92,7 +92,7 @@ Texpile would not be possible without our contributors and sponsors. See [CONTRI
 
 ## Acknowledgements
 
-Texpile builds on pdf.js, Typst, tinymist and others; see [ACKNOWLEDGEMENTS.md](ACKNOWLEDGEMENTS.md).
+Texpile builds on other open-source projects.; see [ACKNOWLEDGEMENTS.md](ACKNOWLEDGEMENTS.md).
 
 ## License
 
