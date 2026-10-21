@@ -5,6 +5,18 @@ Release notes for Texpile Desktop. Add notes under `## [Unreleased]` as you work
 
 ## [Unreleased]
 
+## [1.6.0] - 2026-10-21
+
+- feat: IntelliSense for most CTAN packages and classes (by @louisqli)
+- feat: edit math macros as LaTeX in the visual editor (by @louisqli)
+- feat: wrapped list items line up under their text (by @louisqli)
+- feat: visual editor search matches what the page shows (by @louisqli)
+- feat: Preferences grouped into collapsible sections (by @louisqli)
+- feat: removed the outdated tutorial (by @louisqli)
+- fix: " switches to text in a LaTeX equation on any keyboard layout (by @hkarlsen06)
+- fix: workspace files show when opening a file from macOS Finder (by @louisqli)
+- fix: various smaller bugfixes (by @louisqli)
+
 ## [1.5.0] - 2026-10-13
 
 - feat: snippets (by @louisqli)
