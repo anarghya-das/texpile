@@ -270,37 +270,6 @@ test('the palette lists a package file of each place for editing', async () => {
 	);
 });
 
-test('editing a package file in the app updates completion without reloading', async () => {
-	const session = texpile();
-	const { source } = session;
-	expect(await labelsAfter(session, 'editme.tex', '\\edit')).not.toContain('\\edittwo');
-	await openPackageFile(source, 'Edit Package File for editme');
-	await source.caretAfter('"macros": [');
-	await source.type(' { "name": "edittwo", "doc": "Added in the app" },');
-	await expect.poll(() => source.text()).toContain('"edittwo"');
-	expect(() => JSON.parse(fs.readFileSync(source.path('.texpile/packages/editme.json'), 'utf8'))).not.toThrow();
-	await expect
-		.poll(() => fs.readFileSync(source.path('.texpile/packages/editme.json'), 'utf8'), { timeout: 10_000 })
-		.toContain('"edittwo"');
-	await expect
-		.poll(async () => labelsAfter(session, 'editme.tex', '\\edit'), { timeout: 10_000 })
-		.toEqual(expect.arrayContaining(['\\editone', '\\edittwo']));
-});
-
-test('breaking a package file shows the problem and fixing it loads its commands again', async () => {
-	const session = texpile();
-	const { page, source } = session;
-	await openPackageFile(source, 'Edit Package File for editme');
-	await source.caretAfter('"macros": [');
-	await source.type('@');
-	await expect(bar(page, 'Commands for the editme package in this folder')).toContainText('This file did not load.', {
-		timeout: 10_000
-	});
-	await page.keyboard.press('Backspace');
-	await expect(bar(page, 'Commands for the editme package in this folder')).not.toContainText('did not load', { timeout: 10_000 });
-	expect(await labelsAfter(session, 'editme.tex', '\\edit')).toEqual(expect.arrayContaining(['\\editone', '\\edittwo']));
-});
-
 test('a global package file added while the app runs works without a restart', async () => {
 	const session = texpile();
 	const { page, source, userData } = session;

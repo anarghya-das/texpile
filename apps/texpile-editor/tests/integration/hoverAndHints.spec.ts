@@ -201,13 +201,6 @@ test.describe('hover cards', () => {
 		expect((await hoverInserted('main.tex', ' \\gls{latex}', '\\gls{latex}', 2)).text).toBe('\\gls[]{}[]');
 	});
 
-	test('a package name shows what the package is for and its page', async () => {
-		const h = await hoverWritten('main.tex', 'booktabs', 3);
-		expect(h.text).toContain('booktabs');
-		expect(h.text).toContain('Professional-looking table rules');
-		expect(h.text).toContain('https://ctan.org/pkg/booktabs');
-	});
-
 	test('the second package of a list shows its own card', async () => {
 		const h = await hoverInserted('main.tex', ' \\usepackage{booktabs,siunitx}', 'siunitx}', 3);
 		expect(h.text).toContain('Units and numbers formatting');

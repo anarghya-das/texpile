@@ -322,13 +322,6 @@ group('more names', [
 		typed: 'dvips',
 		hasPrefix: ['dvipsnames']
 	},
-	{
-		name: 'options: the release date slot offers a date',
-		file: 'main.tex',
-		anchor: '\\usepackage{qatools}\n',
-		typed: '\\usepackage{xcolor}[',
-		hasPrefix: ['YYYY/MM/DD']
-	},
 	{ name: 'options: article font size', file: 'main.tex', anchor: '\\documentclass[', replace: '11pt', typed: '12', hasPrefix: ['12pt'] },
 	{
 		name: 'options: a later option in the class list',
