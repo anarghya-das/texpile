@@ -33,7 +33,7 @@ import { guestSession } from '$lib/collab/guestSession';
 import { mdPathCompletion } from '$lib/languages/markdown/pathCompletion';
 import { cmSpellcheck } from '$lib/editor/spellcheck/cmSpellcheck';
 import type { SpellLanguage } from '$lib/editor/spellcheck/languages/spellLanguages';
-import { lintGutter } from '@codemirror/lint';
+import { lintGutter, linter } from '@codemirror/lint';
 import { diagnosticHover } from './diagnostics/diagnosticHover';
 import { comments, commentGutterHandlers } from '$lib/editor/visual/extensions/comments';
 import { mathPreview } from '$lib/editor/source/extensions/math-preview/mathPreview';
@@ -140,6 +140,8 @@ export function buildSourceExtensions(deps: SourceSetupDeps): Extension[] {
 		// covered the toolbar, under the toolbar's own layer
 		tooltips({ tooltipSpace: sourceTooltipSpace }),
 		tooltipCardTheme,
+		// the cards are diagnosticHover's; the lint package's hover keeps the language server's plain ones
+		linter(null, { tooltipFilter: (ds) => ds.filter((d) => !d.renderMessage) }),
 		// multiple cursors: the keymaps already bind the commands, but every transaction is
 		// normalized down to one range until the state allows extra ones
 		EditorState.allowMultipleSelections.of(true),

@@ -1,7 +1,6 @@
 // the problem card under the word on hover: the lint package's own hover opens above it, with no option for below
 import { hoverTooltip, type EditorView as CMView } from '@codemirror/view';
-import { forEachDiagnostic, linter, setDiagnosticsEffect, type Diagnostic } from '@codemirror/lint';
-import type { Extension } from '@codemirror/state';
+import { forEachDiagnostic, setDiagnosticsEffect, type Diagnostic } from '@codemirror/lint';
 
 /** a diagnostic that draws its own card; the language server's plain ones stay with the lint package */
 function hasCard(d: Diagnostic): boolean {
@@ -20,32 +19,28 @@ function cardsAt(view: CMView, pos: number, side: -1 | 1) {
 	return range ? { range: range as { from: number; to: number }, found } : null;
 }
 
-export function diagnosticHover(): Extension {
-	return [
-		hoverTooltip(
-			(view, pos, side) => {
-				const at = cardsAt(view, pos, side);
-				if (!at) return null;
-				return {
-					pos: at.range.from,
-					end: at.range.to,
-					above: false,
-					create() {
-						const dom = document.createElement('div');
-						dom.className = 'cm-diagnostic-cards';
-						for (const d of at.found) dom.append(d.renderMessage!(view));
-						return { dom };
-					}
-				};
-			},
-			{
-				hideOn(tr, tooltip) {
-					const line = tr.startState.doc.lineAt(tooltip.pos);
-					return tr.effects.some((e) => e.is(setDiagnosticsEffect)) || !!tr.changes.touchesRange(line.from, line.to);
+export function diagnosticHover() {
+	return hoverTooltip(
+		(view, pos, side) => {
+			const at = cardsAt(view, pos, side);
+			if (!at) return null;
+			return {
+				pos: at.range.from,
+				end: at.range.to,
+				above: false,
+				create() {
+					const dom = document.createElement('div');
+					dom.className = 'cm-diagnostic-cards';
+					for (const d of at.found) dom.append(d.renderMessage!(view));
+					return { dom };
 				}
+			};
+		},
+		{
+			hideOn(tr, tooltip) {
+				const line = tr.startState.doc.lineAt(tooltip.pos);
+				return tr.effects.some((e) => e.is(setDiagnosticsEffect)) || !!tr.changes.touchesRange(line.from, line.to);
 			}
-		),
-		// the lint package's hover stays for the rest; what it is left with empty is hidden in the card theme
-		linter(null, { tooltipFilter: (ds) => ds.filter((d) => !hasCard(d)) })
-	];
+		}
+	);
 }

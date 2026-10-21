@@ -49,6 +49,7 @@ export const tooltipCardTheme = EditorView.theme({
 		listStyle: 'none',
 		margin: '0'
 	},
+	// what the lint package's own hover is left with once diagnosticHover takes the cards
 	'.cm-tooltip-hover > .cm-tooltip-lint:empty': { display: 'none' },
 	'.cm-tooltip-lint .cm-diagnostic': { padding: '0', margin: '0', border: 'none', whiteSpace: 'normal' },
 	'.cm-tooltip-lint .cm-diagnosticText': { display: 'block' },
