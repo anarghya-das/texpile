@@ -114,17 +114,20 @@ export async function hoverReading(
 	{ offset = 2, nth = 0, keep = false } = {}
 ): Promise<HoverReading> {
 	const { page } = source;
-	await pointMouseAt(source, anchor, offset, nth);
 	const read = () =>
 		page.evaluate(() => {
 			const all = [...document.querySelectorAll('.cm-tooltip-hover')];
 			return { text: all.map((t) => (t as HTMLElement).innerText).join(' | '), html: all.map((t) => t.innerHTML).join('') };
 		});
 	let reading: HoverReading = { text: '', html: '' };
-	await expect
-		.poll(async () => (reading = await read()).text || reading.html, { timeout: 4000 })
-		.not.toBe('')
-		.catch(() => {});
+	for (let attempt = 0; attempt < 3 && !(reading.text || reading.html); attempt++) {
+		if (attempt) await page.mouse.move(2, 2);
+		await pointMouseAt(source, anchor, offset, nth);
+		await expect
+			.poll(async () => (reading = await read()).text || reading.html, { timeout: 4000 })
+			.not.toBe('')
+			.catch(() => {});
+	}
 	if (!keep) await page.mouse.move(2, 2);
 	return reading;
 }
