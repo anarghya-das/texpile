@@ -1,5 +1,5 @@
 // the visual editor's find and replace: matches, the one under the selection, stepping and replacing
-import { NodeSelection, TextSelection, type EditorState, type Selection } from 'prosemirror-state';
+import { NodeSelection, TextSelection, type EditorState, type Selection, type Transaction } from 'prosemirror-state';
 import type { EditorView } from 'prosemirror-view';
 import { editorViewStore } from '$lib/stores/editorStore';
 import { compileFind, type FindMatcher, type FindQuery } from './findQuery';
@@ -36,7 +36,18 @@ class VisualFind {
 	/** the match the selection is on, -1 when it is on none */
 	current = $state(-1);
 	readonly unreplaceable = $derived(this.matches.filter((m) => m.kind === 'unit').length);
+	/** true while find moves the selection: a formula or chip it lands on leaves the keyboard in the find field */
+	movingSelection = false;
 	#matcher: FindMatcher | null = null;
+
+	#select(view: EditorView, tr: Transaction): void {
+		this.movingSelection = true;
+		try {
+			view.dispatch(tr.scrollIntoView());
+		} finally {
+			this.movingSelection = false;
+		}
+	}
 
 	setQuery(query: FindQuery): void {
 		this.#matcher = compileFind(query);
@@ -68,7 +79,7 @@ class VisualFind {
 			dir === 1
 				? (this.matches.find((m) => m.from > from) ?? this.matches[0])
 				: ([...this.matches].reverse().find((m) => m.from < from) ?? this.matches[this.matches.length - 1]);
-		view.dispatch(view.state.tr.setSelection(selectionOn(view.state, next)).scrollIntoView());
+		this.#select(view, view.state.tr.setSelection(selectionOn(view.state, next)));
 		centerSelection(view);
 	}
 
@@ -82,7 +93,7 @@ class VisualFind {
 		const here = texts.find((m) => m.from === from && m.to === to);
 		if (!here) {
 			const next = texts.find((m) => m.from >= from) ?? texts[0];
-			if (next) view.dispatch(view.state.tr.setSelection(selectionOn(view.state, next)).scrollIntoView());
+			if (next) this.#select(view, view.state.tr.setSelection(selectionOn(view.state, next)));
 			return;
 		}
 		const tr = view.state.tr.insertText(matcher.replacementFor(view.state.doc.textBetween(here.from, here.to)), here.from, here.to);

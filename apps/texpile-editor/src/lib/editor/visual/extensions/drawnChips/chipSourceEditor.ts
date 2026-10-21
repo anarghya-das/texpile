@@ -43,12 +43,13 @@ export function chipSourceEditor(parent: HTMLElement, options: ChipSourceEditorO
 				{ key: options.inline ? 'Enter' : 'Mod-Enter', run: run(options.close) },
 				{ key: 'Mod-z', run: run(options.undo) },
 				{ key: 'Mod-y', run: run(options.redo) },
-				{ key: 'Shift-Mod-z', run: run(options.redo) },
-				...defaultKeymap
+				{ key: 'Shift-Mod-z', run: run(options.redo) }
 			]),
 			drawSelection(),
 			CMView.lineWrapping,
 			language.of(options.language === 'latex' ? latex() : []),
+			// after the language, whose Backspace takes out a pair of braces it closed
+			keymap.of(defaultKeymap),
 			cmSyntaxHighlight(),
 			// ahead of the completion's own keymap, which is highest too
 			Prec.highest(keymap.of([{ key: 'Escape', run: dropHiddenCompletion }])),

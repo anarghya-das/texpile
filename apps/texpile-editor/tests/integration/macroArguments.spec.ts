@@ -103,4 +103,7 @@ test('a macro typed in a formula takes an empty argument and opens with the care
 	await expect(source).toBeFocused();
 	await v.page.keyboard.insertText('a');
 	await expect.poll(() => formula(v)).toMatch(/\+\\den\{a\}$/);
+	await v.page.keyboard.press('Backspace');
+	await v.page.keyboard.press('Backspace');
+	await expect.poll(() => formula(v)).toMatch(/\+\\den$/);
 });

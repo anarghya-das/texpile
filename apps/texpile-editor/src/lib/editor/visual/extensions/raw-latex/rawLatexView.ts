@@ -16,6 +16,7 @@ import { rawEditorActiveStore } from '$lib/stores/editorStore';
 import { latexAutocomplete } from '$lib/languages/latex/intellisense/intellisense';
 import { latex } from '$lib/languages/latex/source/latexLanguage';
 import { cmCommentHighlights, cmCommentClicks, syncCmCommentHighlights } from '$lib/editor/visual/extensions/codemirrorbridge/cmComments';
+import { visualFind } from '$lib/editor/visual/find/visualFind.svelte';
 
 // codemirror-backed NodeView for raw source blocks; content reaches the serializer unprocessed.
 // attrs.lang picks the CodeMirror mode: 'latex' (default, with autocomplete), or 'html' /
@@ -265,7 +266,7 @@ export class RawLatexView {
 	}
 
 	selectNode(): void {
-		this.cm.focus();
+		if (!visualFind.movingSelection) this.cm.focus();
 	}
 
 	deselectNode(): void {

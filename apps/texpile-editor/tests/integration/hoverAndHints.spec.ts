@@ -45,6 +45,18 @@ async function hoverInserted(file: string, text: string, anchor: string, offset 
 	});
 }
 
+// what another file holds comes from the project scan, which a slow machine may not have finished; a card shown
+// before it has nothing and stays so while the mouse stays, so hover again until it does
+async function hoverInsertedUntil(file: string, text: string, anchor: string, offset: number, expected: string): Promise<HoverReading> {
+	const { source } = texpile();
+	return withFile(source, file, async () => {
+		await insertAfter(source, file === 'main.tex' ? 'Speed is' : 'Body text.', text);
+		let reading: HoverReading = { text: '', html: '' };
+		await expect.poll(async () => (reading = await hoverReading(source, anchor, { offset })).text, { timeout: 15_000 }).toContain(expected);
+		return reading;
+	});
+}
+
 async function hoverWritten(file: string, anchor: string, offset = 2): Promise<HoverReading> {
 	const { source } = texpile();
 	return withFile(source, file, () => hoverReading(source, anchor, { offset }));
@@ -160,13 +172,13 @@ test.describe('hover cards', () => {
 	});
 
 	test('a ref to a label in another file shows its context and the file', async () => {
-		const h = await hoverInserted('main.tex', ' \\ref{fig:plot}', 'fig:plot', 3);
+		const h = await hoverInsertedUntil('main.tex', ' \\ref{fig:plot}', 'fig:plot', 3, 'A plot.');
 		expect(h.text).toContain('\\caption{A plot.}');
 		expect(h.text).toContain('results.tex');
 	});
 
 	test('a ref to a theorem in another file shows the theorem', async () => {
-		const h = await hoverInserted('main.tex', ' \\ref{thm:main}', 'thm:main', 3);
+		const h = await hoverInsertedUntil('main.tex', ' \\ref{thm:main}', 'thm:main', 3, 'A result.');
 		expect(h.text).toContain('\\begin{theorem}');
 		expect(h.text).toContain('A result.');
 	});
@@ -176,7 +188,7 @@ test.describe('hover cards', () => {
 	});
 
 	test('a glossary key shows its description', async () => {
-		const h = await hoverInserted('main.tex', ' \\gls{latex}', '\\gls{latex}', 7);
+		const h = await hoverInsertedUntil('main.tex', ' \\gls{latex}', '\\gls{latex}', 7, 'a typesetting system');
 		expect(h.text).toContain('latex');
 		expect(h.text).toContain('a typesetting system');
 	});

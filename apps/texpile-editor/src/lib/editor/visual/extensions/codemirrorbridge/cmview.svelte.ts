@@ -29,6 +29,7 @@ import { markdown } from '@codemirror/lang-markdown';
 import { renderStaticCodeBlock, setStaticCode } from './cmStatic';
 import { upgradeWhenNear, cancelUpgrade } from '$lib/editor/visual/extensions/mathlivebridge/mathViewport';
 import type { Extension } from '@codemirror/state';
+import { visualFind } from '$lib/editor/visual/find/visualFind.svelte';
 
 /** resolve a language by its (display) name. LaTeX routes to the app's own mode rather than
  *  language-data's stex, so a latex code block matches the source editor's colours. */
@@ -375,7 +376,7 @@ export class CodeBlockView {
 
 	selectNode(): void {
 		this.materialize();
-		this.cm?.focus();
+		if (!visualFind.movingSelection) this.cm?.focus();
 	}
 
 	deselectNode(): void {

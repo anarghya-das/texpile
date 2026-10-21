@@ -29,6 +29,7 @@ import { observe } from '$lib/runes/observe.svelte';
 import { followSnippetShortcuts } from '$lib/editor/snippets/visual/mathliveSnippets';
 import { showMathMenu } from './mathMenu/showMathMenu';
 import { watchMacroCalls } from './macroArgs/mathMacroCalls';
+import { visualFind } from '$lib/editor/visual/find/visualFind.svelte';
 
 // reactive props stashed on the container so update() can reach the mounted component without a registry.
 type SettingsHost = {
@@ -485,7 +486,7 @@ export class MathLiveView implements NodeView {
 		// the caret is arriving, so build the field regardless of where the viewport is
 		this.materialize();
 		const field = this.mathField;
-		if (!field) return;
+		if (!field || visualFind.movingSelection) return;
 
 		const maybePos = this.mlpluginkey.getState(this.view.state)?.prevCursorPos;
 

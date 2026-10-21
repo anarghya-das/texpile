@@ -36,6 +36,23 @@ test('highlighting matches leaves the formulas and the lines as they were', asyn
 	await expect(v.page.locator('.ProseMirror [data-kept]')).toHaveCount(1);
 });
 
+test('stepping onto a formula leaves the keyboard in the find field', async () => {
+	const v = visual();
+	await v.open('find.tex');
+	await openFind(v, 'sum');
+	const status = v.page.locator('.find-status');
+	await expect(status).toHaveText('0 of 2');
+	// two steps visit the words and the formula, in either order
+	await v.page.keyboard.press('Enter');
+	await expect(status).toHaveText(/^[12] of 2$/);
+	const first = await status.textContent();
+	await v.page.keyboard.press('Enter');
+	await expect(status).not.toHaveText(first ?? '');
+	await expect(v.page.getByRole('textbox', { name: 'Find' })).toBeFocused();
+	await v.page.keyboard.press('Enter');
+	await expect(status).toHaveText(first ?? '');
+});
+
 test('a chip is found by the words it shows and Replace leaves it alone', async () => {
 	const v = visual();
 	await v.open('find.tex');

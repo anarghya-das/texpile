@@ -14,6 +14,7 @@ import { latex } from '$lib/languages/latex/source/latexLanguage';
 import { renderStaticInlineCode, setStaticCode } from '$lib/editor/visual/extensions/codemirrorbridge/cmStatic';
 import { cmCommentHighlights, cmCommentClicks, syncCmCommentHighlights } from '$lib/editor/visual/extensions/codemirrorbridge/cmComments';
 import { upgradeWhenNear, cancelUpgrade } from '$lib/editor/visual/extensions/mathlivebridge/mathViewport';
+import { visualFind } from '$lib/editor/visual/find/visualFind.svelte';
 
 // single-line inline codemirror for inline_latex; new newlines rejected, enter / arrow-out exit the node
 
@@ -299,7 +300,7 @@ export class InlineLatexView {
 	selectNode(): void {
 		this.materialize();
 		this.setEditable(true);
-		this.cm?.focus();
+		if (!visualFind.movingSelection) this.cm?.focus();
 	}
 
 	stopEvent(): boolean {
