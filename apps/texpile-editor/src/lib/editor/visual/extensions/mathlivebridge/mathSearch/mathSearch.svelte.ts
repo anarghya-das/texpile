@@ -6,8 +6,6 @@ import type { EditorView as CMView } from '@codemirror/view';
 import { insertIntoSource } from '$lib/editor/source/extensions/math-search/sourceMathInsert';
 import { insertSymbol } from '$lib/editor/visual/toolbar/mathInsert';
 import { expandSnippet } from '$lib/editor/snippets/expand/expandSnippet';
-import { offerPackageFor } from '$lib/languages/latex/symbols/latexSymbolPackage';
-import type { LatexSymbol } from '$lib/languages/latex/symbols/latexSymbol.types';
 import { m } from '$lib/paraglide/messages';
 import type { MathSyntax } from '../mathFieldFactory';
 import { mathStructures, searchStructures, type MathStructure } from './mathStructures';
@@ -173,7 +171,6 @@ class MathSearchState {
 		else insertSymbol(command.insert, syntax);
 		if (!symbol || !loaded) return;
 		loaded.set.remember(symbol.id);
-		if (syntax === 'latex') offerPackageFor(symbol as LatexSymbol);
 	}
 }
 
@@ -190,7 +187,6 @@ function pickInSource(view: CMView, result: MathSearchResult, loaded: MathEntrie
 	const { symbol } = result.entry;
 	if (!symbol || !loaded) return;
 	loaded.set.remember(symbol.id);
-	offerPackageFor(symbol as LatexSymbol);
 }
 
 function placeUnder(field: MathfieldElement): MathSearchPlace | null {

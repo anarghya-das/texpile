@@ -13,7 +13,7 @@ import {
 	latexSymbolVisualInsertion,
 	latexVisualInsertionText
 } from './latexSymbolInsert';
-import { offerPackageFor, usepackageFor } from './latexSymbolPackage';
+import { usepackageFor } from './latexSymbolPackage';
 import type { LatexSymbol, LatexSymbolMode } from './latexSymbol.types';
 
 export function latexSymbolGroupLabel(group: LatexSymbolGroup): string {
@@ -91,7 +91,6 @@ export const latexSymbolSet: SymbolSet<LatexSymbol> = {
 			target.view.dispatch(computeLatexSymbolInsert(target.view.state, symbol));
 			target.view.focus();
 		} else insertLatexSymbolVisual(target.view, symbol);
-		offerPackageFor(symbol);
 	},
 	insertionText: (target, symbol) =>
 		target.kind === 'source'

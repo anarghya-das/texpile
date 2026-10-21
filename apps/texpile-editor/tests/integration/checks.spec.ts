@@ -269,6 +269,22 @@ test.describe('the card', () => {
 		});
 	});
 
+	test('the card opens under the word and closes once its fix is taken', async () => {
+		const { source, page } = texpile();
+		await withFile(source, 'main.tex', async () => {
+			await insertAfter(source, 'Speed is', ' $\\mathbb{R}$');
+			await waitForDiagnostic(source, on('mathbb'));
+			const cards = await hoverCard(source, '\\mathbb');
+			const line = await page.locator('.cm-line').filter({ hasText: 'Speed is' }).first().boundingBox();
+			expect((await cards.first().boundingBox())!.y).toBeGreaterThan(line!.y + line!.height / 2);
+			await cards
+				.first()
+				.getByRole('button', { name: /usepackage\{amsfonts\}/ })
+				.click();
+			await expect(page.locator('.cm-tooltip-hover .card')).toHaveCount(0);
+		});
+	});
+
 	test('a card with no fix offers none', async () => {
 		const { source } = texpile();
 		await withFile(source, 'main.tex', async () => {

@@ -11,7 +11,7 @@ import {
 	crosshairCursor
 } from '@codemirror/view';
 import type { ViewUpdate } from '@codemirror/view';
-import { EditorState, type Compartment, type Extension } from '@codemirror/state';
+import { EditorState, Prec, type Compartment, type Extension } from '@codemirror/state';
 import { defaultKeymap } from '@codemirror/commands';
 import { tabIndentBinding } from './extensions/keybindings/cmTabKey';
 import { MARKDOWN_LIST_MARKER, TYPST_LIST_MARKER, wrapIndent } from './extensions/wrap-indent/wrapIndent';
@@ -34,6 +34,7 @@ import { mdPathCompletion } from '$lib/languages/markdown/pathCompletion';
 import { cmSpellcheck } from '$lib/editor/spellcheck/cmSpellcheck';
 import type { SpellLanguage } from '$lib/editor/spellcheck/languages/spellLanguages';
 import { lintGutter } from '@codemirror/lint';
+import { diagnosticHover } from './diagnostics/diagnosticHover';
 import { comments, commentGutterHandlers } from '$lib/editor/visual/extensions/comments';
 import { mathPreview } from '$lib/editor/source/extensions/math-preview/mathPreview';
 import { starterGhost } from '$lib/editor/source/extensions/starter-ghost/starterGhost';
@@ -104,7 +105,8 @@ export function buildSourceExtensions(deps: SourceSetupDeps): Extension[] {
 	const snippetOptions = { stopUndoCapture: () => deps.undoManager?.stopCapturing() };
 	return [
 		// gutters render in extension order: lint goes before lineNumbers so it lands on their left
-		...(!fileFor || /\.(tex|typ)$/i.test(fileFor) ? [lintGutter({ hoverTime: 0 })] : []),
+		// the hover first: hover cards share one box, which opens on the side the first one asks for
+		...(!fileFor || /\.(tex|typ)$/i.test(fileFor) ? [lintGutter({ hoverTime: 0 }), Prec.high(diagnosticHover())] : []),
 		// mounted only where the caller wants comments, so a standalone editor grows no gutter
 		// column for a feature nothing feeds. Suggestions ride in here too, and a file whose editor
 		// skips it still stages them, with nothing drawn to say so

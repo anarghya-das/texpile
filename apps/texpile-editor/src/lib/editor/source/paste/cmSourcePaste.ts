@@ -14,7 +14,6 @@ import { formattedSource, tableSource } from './sourcePasteConvert';
 import { linkSource, pastedUrl, sourcePasteKinds, type SourceClipboard, type SourcePasteKind } from './sourcePasteOptions';
 import { choosePasteReading, pasteAsWidget, setOpenPaste, showPasteReadings, type OpenPaste, type PasteReading } from './cmPasteAsWidget';
 import { clipboardImage, pasteImageFile } from './sourcePasteImage';
-import { offerPackageForCommand } from '$lib/languages/latex/symbols/latexSymbolPackage';
 import { isMathContext } from '$lib/languages/latex/intellisense/completion/mathContext';
 import { commandNames } from '$lib/languages/latex/knowledge/calls/commandCalls';
 import { commonEnvFacts, hasLiteralBody } from '$lib/languages/latex/knowledge/environments/envFacts';
@@ -80,8 +79,7 @@ function readingsOf(kinds: SourcePasteKind[], clip: SourceClipboard, selected: s
 	return kinds.flatMap((kind) => {
 		const text = readingText(kind, clip, selected, dialect)?.replace(/\r\n?/g, '\n');
 		if (text == null) return [];
-		const linked = dialect === 'latex' && text.includes('\\href{');
-		return [{ kind, label: readingLabel(kind, dialect), text, written: linked ? () => offerPackageForCommand('href') : undefined }];
+		return [{ kind, label: readingLabel(kind, dialect), text }];
 	});
 }
 

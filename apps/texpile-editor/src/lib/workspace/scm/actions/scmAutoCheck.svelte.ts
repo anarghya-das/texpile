@@ -13,8 +13,6 @@ import { nativeBridge } from '../../fileSystem';
 import { errMsg, NO_BRIDGE } from '../git';
 import type { GitFetchResult } from '../remote/scmFetch.svelte';
 import { settings } from '$lib/settings';
-import { toaster } from '$lib/modals/toaster-svelte';
-import { m } from '$lib/paraglide/messages';
 
 export type GitAutoCheckBridge = {
 	gitFetchQuiet?: (root: string) => Promise<GitFetchResult>;
@@ -54,15 +52,13 @@ async function fetchQuiet(root: string): Promise<GitFetchResult> {
 export class AutoCheck {
 	#timer: ReturnType<typeof setTimeout> | undefined;
 	#last = 0;
-	#reported = 0;
 	#on = false;
 
-	constructor(private deps: { isBusy(): boolean; sync(): void }) {}
+	constructor(private deps: { isBusy(): boolean }) {}
 
 	start = (): void => {
 		this.#on = true;
 		this.#last = 0;
-		this.#reported = 0;
 		window.addEventListener('focus', this.#onFocus);
 		this.#schedule(SOON_MS);
 	};
@@ -120,18 +116,7 @@ export class AutoCheck {
 			if (res.failure === 'cancelled' || res.failure === 'auth') paused = root;
 			return;
 		}
-		if (workspaceRoot.current !== root) return;
-		await refreshGitStatus(root);
-		const behind = res.behind ?? 0;
-		// said once per new arrival, not on every check while the author has not synced yet
-		if (behind > this.#reported) {
-			const remote = res.remote ?? '';
-			toaster.info({
-				title: behind === 1 ? m.vcs_fetch_new_one({ remote }) : m.vcs_fetch_new_count({ remote, count: behind }),
-				description: m.vcs_auto_new_detail(),
-				action: { label: m.vcs_action_sync(), onClick: () => this.deps.sync() }
-			});
-		}
-		this.#reported = behind;
+		// news only on the Sync button, as VS Code's status bar: no notice
+		if (workspaceRoot.current === root) await refreshGitStatus(root);
 	}
 }

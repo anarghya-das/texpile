@@ -13,8 +13,6 @@ export type PasteReading = {
 	kind: SourcePasteKind;
 	label: string;
 	text: string;
-	/** runs once the reading is written: a LaTeX link offers hyperref */
-	written?: () => void;
 };
 
 /** a paste still open to another reading: where its text is, and which reading that text is (none yet from the palette) */
@@ -33,7 +31,6 @@ export function choosePasteReading(view: CMView, paste: OpenPaste, reading: Past
 		userEvent: 'input.paste',
 		scrollIntoView: true
 	});
-	reading.written?.();
 	view.focus();
 }
 

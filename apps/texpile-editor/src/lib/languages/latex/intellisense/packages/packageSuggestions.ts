@@ -1,7 +1,5 @@
-// commands of common packages the document does not load, offered below the rest with their \usepackage
-import { pickedCompletion, type Completion } from '@codemirror/autocomplete';
-import type { EditorView } from '@codemirror/view';
-import { offerPackageFor } from '$lib/languages/latex/symbols/latexSymbolPackage';
+// commands of common packages the document does not load, offered below the rest with the package each needs
+import type { Completion } from '@codemirror/autocomplete';
 import { packageCompletions, type EnvironmentName, type MacroCompletion } from './packageCompletions';
 import { compileEngine, isDegraded, KERNEL_PACKAGE, packagesLoadedBy, type LoadedFile } from './loadedPackages';
 import { stackedCommands, stackedEnvironments } from '../../knowledge/stackedEntries';
@@ -14,27 +12,9 @@ import { useNameOf } from '../../knowledge/fileIds';
 
 const BELOW_LOADED = -10;
 
-/** the option ranked below the rest, never raised in math, offering the \usepackage once taken */
-export function offeringPackage<T extends Completion>(option: T, pkg: string, command: string): T {
-	const insert = option.apply;
-	return {
-		...option,
-		detail: pkg,
-		boost: BELOW_LOADED,
-		math: false,
-		apply(view: EditorView, completion: Completion, from: number, to: number) {
-			if (typeof insert === 'function') insert(view, completion, from, to);
-			else {
-				const text = insert ?? completion.label;
-				view.dispatch({
-					changes: { from, to, insert: text },
-					selection: { anchor: from + text.length },
-					annotations: pickedCompletion.of(completion)
-				});
-			}
-			offerPackageFor({ command, package: pkg, fontenc: '' });
-		}
-	};
+/** the option ranked below the rest and never raised in math, with the package it needs */
+export function offeringPackage<T extends Completion>(option: T, pkg: string): T {
+	return { ...option, detail: pkg, boost: BELOW_LOADED, math: false };
 }
 
 export type SuggestedEnvironment = EnvironmentName & { pkg: string };
@@ -64,7 +44,7 @@ function suggestionsOf(name: string): Promise<Suggested> {
 			const engines = layers.reduce<string[] | undefined>((e, l) => l.engines ?? e, undefined);
 			const engine = compileEngine();
 			return {
-				macros: brought.macros.map((o) => offeringPackage(o, name, o.label)),
+				macros: brought.macros.map((o) => offeringPackage(o, name)),
 				envs: brought.envs.map((e) => ({ ...e, pkg: name })),
 				names: new Map(loaded.map((p) => [p.name, definedNames(p)])),
 				clashes: new Set((layers.reduce<string[] | undefined>((c, l) => l.clashes ?? c, undefined) ?? []).map(useNameOf)),

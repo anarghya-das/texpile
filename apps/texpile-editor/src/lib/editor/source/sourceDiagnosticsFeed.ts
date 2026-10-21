@@ -1,6 +1,6 @@
 // Feeds compile-log problems into CodeMirror's lint state, narrowing each line-level
 // diagnostic to the offending token and skipping dispatches that cannot change anything.
-import type { EditorView } from '@codemirror/view';
+import { closeHoverTooltips, type EditorView } from '@codemirror/view';
 import type { EditorState } from '@codemirror/state';
 import { forEachDiagnostic, setDiagnostics, type Diagnostic } from '@codemirror/lint';
 import { addPackageInsertion } from '$lib/languages/latex/intellisense/packages/packageInsertion';
@@ -67,7 +67,10 @@ function cardOf(view: EditorView, diagnostic: Diagnostic, d: SourceDiagnostic, h
 						label: offer.label,
 						code: offer.code,
 						replacing: offer.kind === 'replace' ? view.state.sliceDoc(range.from, range.to) : undefined,
-						apply: () => offer.apply(view, rangeOf(view, diagnostic))
+						apply: () => {
+							offer.apply(view, rangeOf(view, diagnostic));
+							view.dispatch({ effects: closeHoverTooltips });
+						}
 					}
 				: undefined,
 			turnOff:

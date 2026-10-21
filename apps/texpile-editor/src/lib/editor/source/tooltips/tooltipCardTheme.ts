@@ -34,14 +34,22 @@ export const tooltipCardTheme = EditorView.theme({
 	'.cm-argument-hint-active': { fontWeight: '700', color: 'var(--primary-ink)' },
 
 	// the diagnostic and rename cards draw their own surface; the lint gutter's tooltip is the list itself
-	'.cm-tooltip-hover > .cm-tooltip-lint, .cm-tooltip.cm-tooltip-lint, .cm-tooltip.cm-rename-card': {
-		backgroundColor: 'transparent',
-		border: 'none',
-		boxShadow: 'none',
-		padding: '0',
-		backdropFilter: 'none'
+	'.cm-tooltip-hover > .cm-tooltip-lint, .cm-tooltip-hover > .cm-diagnostic-cards, .cm-tooltip.cm-tooltip-lint, .cm-tooltip.cm-rename-card':
+		{
+			backgroundColor: 'transparent',
+			border: 'none',
+			boxShadow: 'none',
+			padding: '0',
+			backdropFilter: 'none'
+		},
+	'.cm-tooltip-lint, .cm-diagnostic-cards': {
+		display: 'flex',
+		flexDirection: 'column',
+		gap: 'calc(var(--spacing) * 1)',
+		listStyle: 'none',
+		margin: '0'
 	},
-	'.cm-tooltip-lint': { display: 'flex', flexDirection: 'column', gap: 'calc(var(--spacing) * 1)', listStyle: 'none', margin: '0' },
+	'.cm-tooltip-hover > .cm-tooltip-lint:empty': { display: 'none' },
 	'.cm-tooltip-lint .cm-diagnostic': { padding: '0', margin: '0', border: 'none', whiteSpace: 'normal' },
 	'.cm-tooltip-lint .cm-diagnosticText': { display: 'block' },
 

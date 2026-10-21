@@ -204,10 +204,9 @@ export class WorkspaceIntegrations {
 		closeAgentSessionWithWorkspace();
 		const fetcher = new ScmFetch(this.scm);
 		// co-authors' new versions, looked for every few minutes while this project is open
-		const autoCheck = new AutoCheck({ isBusy: () => this.scm.busy, sync: () => void this.scm.sync() });
+		const autoCheck = new AutoCheck({ isBusy: () => this.scm.busy });
 		$effect(() => {
-			// again for each folder opened in this window: checked soon after it opens, as the first
-			// was, with nothing the last one announced counted against it
+			// again for each folder opened in this window: checked soon after it opens, as the first was
 			void workspaceRoot.current;
 			autoCheck.start();
 			return autoCheck.stop;

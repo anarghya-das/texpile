@@ -110,7 +110,7 @@ export async function environmentCompletionSource(ctx: CompletionContext): Promi
 		...envs.map((e) => (isFresh ? forBeginOption(e.name, e.detail) : asNameOption(e.name, e.detail))),
 		...fromBuffer.map((n) => (isFresh ? forBeginOption(n, 'in this file') : asNameOption(n, 'in this file'))),
 		...fromProject.map((n) => (isFresh ? forBeginOption(n, 'in this project') : asNameOption(n, 'in this project'))),
-		...suggested.map((e) => offeringPackage(isFresh ? forBeginOption(e.name) : asNameOption(e.name), e.pkg, `\\begin{${e.name}}`))
+		...suggested.map((e) => offeringPackage(isFresh ? forBeginOption(e.name) : asNameOption(e.name), e.pkg))
 	];
 	if (!isBegin) {
 		const open = openEnvName(text.slice(0, match.from));

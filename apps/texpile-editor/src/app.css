@@ -213,7 +213,7 @@ html.window-glass
 html.window-glass :is(.shadow-lg, .shadow-xl, .shadow-2xl):is(.bg-surface-50-950, .bg-surface-100-900),
 html.window-glass [data-scope='toast'][data-part='root'],
 html.window-glass .cm-tooltip:not(.cm-tooltip-hover, .cm-tooltip-lint),
-html.window-glass .cm-tooltip-hover > .cm-tooltip-section:not(.cm-tooltip-lint),
+html.window-glass .cm-tooltip-hover > .cm-tooltip-section:not(.cm-tooltip-lint, .cm-diagnostic-cards),
 html.window-glass .cm-comment-add,
 html.window-glass .cm-comment-add-card,
 html.window-glass .settings-button,
@@ -251,7 +251,7 @@ html.window-glass[data-mode='dark'] #mathlive-suggestion-popover {
 /* these take the second dark step as their ground, which is a mark on a sheet. The pill keeps the ground when hovered
    too: a mark there would make it clearer under the pointer */
 html.window-glass .cm-tooltip:not(.cm-tooltip-hover, .cm-tooltip-lint),
-html.window-glass .cm-tooltip-hover > .cm-tooltip-section:not(.cm-tooltip-lint),
+html.window-glass .cm-tooltip-hover > .cm-tooltip-section:not(.cm-tooltip-lint, .cm-diagnostic-cards),
 html.window-glass .cm-tooltip.cm-tooltip-autocomplete,
 html.window-glass .cm-tooltip.cm-math-preview,
 html.window-glass .cm-comment-add,
@@ -1515,6 +1515,11 @@ html.pm-drop-refused .pm-drop-cursor {
 [data-scope='toast'][data-part='action-trigger'] {
 	@apply btn-sm preset-tonal;
 }
+/* tonal through Skeleton's toast styles rather than a class, so the tonal button hover above misses them */
+[data-scope='toast']:is([data-part='action-trigger'], [data-part='close-trigger']):not(:disabled):hover {
+	filter: none;
+	background-color: var(--tonal-hover);
+}
 /* work under way is one line, so its action (a Cancel) sits beside the title rather than on a row of its own */
 [data-scope='toast'][data-part='root'][data-type='loading'] {
 	display: flex;
@@ -2434,6 +2439,44 @@ math-field[data-macro-selected] {
 	.hover\:preset-tonal-error:hover {
 		background-color: var(--error-tonal);
 		color: var(--error-on-tonal);
+	}
+}
+
+/* Skeleton's btn hover is brightness(125%), which leaves a pale tonal fill almost as it was; a tonal
+   button steps its fill instead. :where keeps the fill at one class, so a hover:bg-* on the button
+   still wins */
+:is(.btn, .btn-icon):is(
+		.preset-tonal,
+		.preset-tonal-primary,
+		.preset-tonal-secondary,
+		.preset-tonal-tertiary,
+		.preset-tonal-success,
+		.preset-tonal-warning,
+		.preset-tonal-error
+	):not(:disabled):hover {
+	filter: none;
+}
+@layer utilities {
+	.preset-tonal:where(.btn, .btn-icon):where(:not(:disabled):hover) {
+		background-color: var(--tonal-hover);
+	}
+	.preset-tonal-primary:where(.btn, .btn-icon):where(:not(:disabled):hover) {
+		background-color: var(--primary-tonal-hover);
+	}
+	.preset-tonal-secondary:where(.btn, .btn-icon):where(:not(:disabled):hover) {
+		background-color: var(--secondary-tonal-hover);
+	}
+	.preset-tonal-tertiary:where(.btn, .btn-icon):where(:not(:disabled):hover) {
+		background-color: var(--tertiary-tonal-hover);
+	}
+	.preset-tonal-success:where(.btn, .btn-icon):where(:not(:disabled):hover) {
+		background-color: var(--success-tonal-hover);
+	}
+	.preset-tonal-warning:where(.btn, .btn-icon):where(:not(:disabled):hover) {
+		background-color: var(--warning-tonal-hover);
+	}
+	.preset-tonal-error:where(.btn, .btn-icon):where(:not(:disabled):hover) {
+		background-color: var(--error-tonal-hover);
 	}
 }
 

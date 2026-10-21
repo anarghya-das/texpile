@@ -129,6 +129,8 @@ html {
 	--surface-tint: color-mix(in oklab, var(--color-surface-200-800) 40%, transparent);
 	/* hover:preset-tonal's fill laid on the ground, for a control that must hide what is under it */
 	--tonal-hover-solid: color-mix(in oklab, light-dark(var(--color-surface-950), var(--color-surface-50)) 10%, var(--color-surface-50-950));
+	/* a preset-tonal button's hover, one step on from its fill */
+	--tonal-hover: color-mix(in oklab, light-dark(var(--color-surface-950), var(--color-surface-50)) 18%, transparent);
 	--surface-wash: color-mix(in oklab, var(--color-surface-200-800) 60%, transparent);
 	--surface-strong-wash: color-mix(in oklab, var(--color-surface-300-700) 60%, transparent);
 	--surface-strong-wash-solid: color-mix(in oklab, var(--color-surface-300-700) 60%, var(--color-surface-50-950));
