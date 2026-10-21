@@ -2,6 +2,7 @@
 
 Beyond its package dependencies, Texpile vendors or derives from the following projects:
 
+- [Mathlive](https://github.com/arnog/mathlive/) (MIT). Texpile uses a custom fork of Mathlive to edit math equations visually
 - [LaTeX Workshop](https://github.com/James-Yu/LaTeX-Workshop) (MIT). The completion forms such as `\left( … \right)`, the `@` snippets and the package captions come from its data; the license is in `apps/texpile-editor/src/lib/languages/latex/intellisense/data/VENDORED-LICENSES.md`.
 - [pdf.js](https://github.com/mozilla/pdf.js) (Apache-2.0). The live preview's Type1 font parsing is adapted from it.
 - [Typst](https://github.com/typst/typst) (Apache-2.0). The Typst symbol picker's table is generated from Typst's own symbol names.
