@@ -212,7 +212,7 @@
 						{/if}
 					</div>
 				{:else}
-					<Combobox.Content class="min-h-0 [scrollbar-gutter:stable] overflow-y-auto border-none bg-transparent p-1.5">
+					<Combobox.Content class="min-h-0 [scrollbar-gutter:stable_both-edges] overflow-y-auto border-none bg-transparent p-1.5">
 						{#each results as scored, i (scored.item.id)}
 							{@const header = groupOf(i)}
 							{#if header}

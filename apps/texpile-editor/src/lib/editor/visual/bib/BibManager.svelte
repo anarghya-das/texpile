@@ -330,9 +330,9 @@
 			</div>
 		{/if}
 		<div
-			class="mx-auto flex min-h-0 w-full max-w-7xl flex-1 [scrollbar-gutter:stable] flex-col gap-4 overflow-y-auto p-4 @xl:flex-row @xl:overflow-hidden"
+			class="mx-auto flex min-h-0 w-full max-w-7xl flex-1 [scrollbar-gutter:stable_both-edges] flex-col gap-4 overflow-y-auto p-4 @xl:flex-row @xl:overflow-hidden"
 		>
-			<div class="shrink-0 @xl:min-h-0 @xl:w-1/2 @xl:[scrollbar-gutter:stable] @xl:overflow-y-auto @xl:pr-3">
+			<div class="shrink-0 @xl:min-h-0 @xl:w-1/2 @xl:[scrollbar-gutter:stable_both-edges] @xl:overflow-y-auto @xl:pr-3">
 				<button
 					class="btn preset-outlined-surface-200-800 hover:preset-tonal mb-3 w-full"
 					type="button"
@@ -357,7 +357,7 @@
 
 			<div
 				bind:this={formPanel}
-				class="border-surface-200-800 shrink-0 border-t pt-4 @xl:min-h-0 @xl:flex-1 @xl:shrink @xl:[scrollbar-gutter:stable] @xl:overflow-y-auto @xl:border-t-0 @xl:border-l @xl:pt-0 @xl:pr-4 @xl:pl-4"
+				class="border-surface-200-800 shrink-0 border-t pt-4 @xl:min-h-0 @xl:flex-1 @xl:shrink @xl:[scrollbar-gutter:stable_both-edges] @xl:overflow-y-auto @xl:border-t-0 @xl:border-l @xl:pt-0 @xl:pr-4 @xl:pl-4"
 			>
 				<div class="mb-2 flex items-center gap-2 text-base font-semibold">
 					{#if isEditing}

@@ -94,7 +94,7 @@
 			<X class="size-4" />
 		</button>
 	</div>
-	<div class="flex-1 [scrollbar-gutter:stable] overflow-y-auto" tabindex="-1" role="presentation" onmousedown={preventFocusLoss}>
+	<div class="flex-1 [scrollbar-gutter:stable_both-edges] overflow-y-auto" tabindex="-1" role="presentation" onmousedown={preventFocusLoss}>
 		{#if group.id === 'matrices'}
 			<div class="border-surface-300-700 border-b p-3">
 				<div class="mb-2 text-xs font-medium">{m.mathtoolbar_matrix_style_label()}</div>

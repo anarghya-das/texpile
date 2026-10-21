@@ -96,7 +96,7 @@
 			>
 		</div>
 
-		<div class="border-surface-200-800 rounded-base mt-2 max-h-44 [scrollbar-gutter:stable] overflow-y-auto border p-2">
+		<div class="border-surface-200-800 rounded-base mt-2 max-h-44 [scrollbar-gutter:stable_both-edges] overflow-y-auto border p-2">
 			{#if !all.length}
 				<p class="text-muted py-2 text-center text-sm">{m.spelldict_empty_state()}</p>
 			{:else if !found.length}

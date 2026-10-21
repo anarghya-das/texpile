@@ -252,7 +252,7 @@
 		<!-- which half matters depends on what you are doing, so it is not the scrollbar's decision -->
 		<div class="flex min-h-0 flex-1 flex-col" bind:this={splitEl}>
 			<div class="flex min-h-0 flex-col" style="flex: 1 1 0%">
-				<div class="scroll-inset-r min-h-0 flex-1 [scrollbar-gutter:stable] overflow-y-auto pb-2">
+				<div class="min-h-0 flex-1 overflow-y-auto pb-2 {changes.length ? 'scroll-inset-r [scrollbar-gutter:stable]' : ''}">
 					{#if changes.length}
 						<!-- The total, then the groups it is made of. Deliberately not a group row itself: no
 						     tick box and no chevron, so a summary cannot be mistaken for what it summarises. -->
