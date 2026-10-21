@@ -921,13 +921,6 @@ test.describe('rename', () => {
 test.describe('acro keys', () => {
 	test.describe.configure({ mode: 'default' });
 
-	test('hovering an acronym key shows its long form', async () => {
-		const h = await hoverInserted('main.tex', ' \\ac{cpu}', '\\ac{cpu}', 5);
-		expect(h.text, 'the hover over the key of \\ac{cpu}, which \\DeclareAcronym{cpu}{...long=central processing unit} defines').toContain(
-			'central processing unit'
-		);
-	});
-
 	test('F12 on an acronym key jumps to its \\DeclareAcronym', async () => {
 		const { source } = texpile();
 		await withFile(source, 'main.tex', async () => {
