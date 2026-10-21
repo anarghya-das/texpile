@@ -8,7 +8,7 @@
 
 	const appVersion = __APP_VERSION__; // injected by Vite from package.json
 
-	let { index, select, canTutorial }: { index: number; select: (value: string) => void; canTutorial: boolean } = $props();
+	let { index, select }: { index: number; select: (value: string) => void } = $props();
 </script>
 
 <Menu onSelect={(d) => select(d.value)}>
@@ -24,9 +24,6 @@
 		<Menu.Positioner>
 			<Menu.Content class={menuContentClass}>
 				<Menu.Item value="shortcuts" class={menuBarItemClass}><Menu.ItemText>{m.menubar_keyboard_shortcuts()}</Menu.ItemText></Menu.Item>
-				{#if canTutorial}
-					<Menu.Item value="tutorial" class={menuBarItemClass}><Menu.ItemText>{m.menubar_open_tutorial()}</Menu.ItemText></Menu.Item>
-				{/if}
 				{#if !__WEB__}
 					<Menu.Item value="whatsnew" class={menuBarItemClass}>
 						<Menu.ItemText>{m.whatsnew_menu_label()}</Menu.ItemText>

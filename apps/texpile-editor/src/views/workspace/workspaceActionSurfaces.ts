@@ -76,7 +76,6 @@ export type ActionSurfaceDeps = {
 	setDockView: (v: DockView) => void;
 	getDockView: () => DockView;
 	setShareModalOpen: (open: boolean) => void;
-	setTutorialModalOpen: (open: boolean) => void;
 	openGlobalSearch: () => void;
 	closeGlobalSearch: () => void;
 	replaceInFolder: (files: string[], spec: ReplaceSpec) => Promise<void>;
@@ -292,7 +291,6 @@ export function makeChromeActions(d: ActionSurfaceDeps) {
 		newTerminal: () => d.termDock().newTerminal(),
 		toggleTerminal: () => d.termDock().toggle(),
 		openFormatModal: () => d.fmt.openFormatModal(),
-		openTutorial: () => d.setTutorialModalOpen(true),
 		saveAsTemplate: () => saveAsTemplate(d),
 		uiZoomIn,
 		uiZoomOut,

@@ -8,7 +8,7 @@ import { wholeTableEdits } from '$lib/editor/visual/extensions/table/wholeTableE
 import { parseLatexFile } from '$lib/workspace/latexRoundtrip';
 import { parseTypstFile } from '$lib/languages/typst/visual/roundtrip';
 
-const BASICS = readFileSync(`${__dirname}/../../../../../src/lib/workspace/starters/tutorial/basics.tex`, 'utf8');
+const BASICS = readFileSync(`${__dirname}/../../../../fixtures/comments/basics.tex`, 'utf8');
 const FIGURE = `The table below lists the runs.
 
 #figure(

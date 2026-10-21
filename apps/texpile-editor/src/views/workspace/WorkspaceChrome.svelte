@@ -131,7 +131,6 @@
 			onNewTerminal={actions.newTerminal}
 			onToggleTerminal={actions.toggleTerminal}
 			onFormatDocument={menu.canFormat ? actions.openFormatModal : undefined}
-			onOpenTutorial={actions.openTutorial}
 			uiZoomPercent={menu.uiZoomPercent}
 			onZoomIn={actions.uiZoomIn}
 			onZoomOut={actions.uiZoomOut}

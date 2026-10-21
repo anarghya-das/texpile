@@ -96,7 +96,7 @@ function docs(): Doc[] {
 	const read = (p: string) => readFileSync(p, 'utf8').replace(/\r\n/g, '\n');
 	const out: Doc[] = [
 		{ f: tex, name: 'feature-sweep.tex', text: read(tex.files[0]) },
-		{ f: tex, name: 'tutorial/basics.tex', text: read(`${__dirname}/../../../../src/lib/workspace/starters/tutorial/basics.tex`) },
+		{ f: tex, name: 'basics.tex', text: read(`${__dirname}/../../../fixtures/comments/basics.tex`) },
 		{ f: md, name: 'feature-sweep.md', text: read(md.files[0]) },
 		{ f: typ, name: 'feature-sweep.typ', text: read(typ.files[0]) },
 		{ f: typ, name: 'tables.typ', text: TYP_TABLES }

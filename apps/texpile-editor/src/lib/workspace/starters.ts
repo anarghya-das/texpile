@@ -4,20 +4,13 @@
 // when re-loaded with different options. only bundle content we can freely redistribute
 // (no IEEEtran.cls and friends). the Typst starters use the standard library alone: a fresh
 // tinymist with no network has to compile every one of them.
-import { joinPath, writeTextFile, writeBinaryFile, statFile, scanTree } from './fileSystem';
+import { joinPath, writeTextFile, statFile } from './fileSystem';
 import { m } from '$lib/paraglide/messages';
 
 // keys look like "./starters/mla/main.tex" or "./starters/typst-report/chapters/method.typ"; vite
 // inlines the contents eagerly as strings
 const RAW = import.meta.glob('./starters/*/**/*.{tex,bib,typ,svg}', {
 	query: '?raw',
-	import: 'default',
-	eager: true
-}) as Record<string, string>;
-
-// binary assets (currently just images) stay as URLs; fetched into bytes only when a starter is applied
-const BINARY_URLS = import.meta.glob('./starters/*/**/*.png', {
-	query: '?url',
 	import: 'default',
 	eager: true
 }) as Record<string, string>;
@@ -38,8 +31,6 @@ export type Starter = {
 	mainFile: string;
 	/** relative path -> file contents, written verbatim into the folder. */
 	files: Record<string, string>;
-	/** relative path -> bundled asset URL, fetched and written as bytes into the folder. */
-	binaryFiles?: Record<string, string>;
 };
 
 /** gathers the bundled text files for a starter id. */
@@ -48,16 +39,6 @@ function filesFor(id: string): Record<string, string> {
 	const out: Record<string, string> = {};
 	for (const [key, content] of Object.entries(RAW)) {
 		if (key.startsWith(prefix)) out[key.slice(prefix.length)] = content;
-	}
-	return out;
-}
-
-/** gathers the bundled binary assets (e.g. images) for a starter id. */
-function binaryFilesFor(id: string): Record<string, string> {
-	const prefix = `./starters/${id}/`;
-	const out: Record<string, string> = {};
-	for (const [key, url] of Object.entries(BINARY_URLS)) {
-		if (key.startsWith(prefix)) out[key.slice(prefix.length)] = url;
 	}
 	return out;
 }
@@ -116,19 +97,6 @@ export const STARTERS: Starter[] = [
 		lang: 'latex',
 		mainFile: 'main.tex',
 		files: filesFor('apa')
-	},
-	{
-		id: 'tutorial',
-		get name() {
-			return m.starterdef_tutorial_name();
-		},
-		get description() {
-			return m.starterdef_tutorial_description();
-		},
-		lang: 'latex',
-		mainFile: 'main.tex',
-		files: filesFor('tutorial'),
-		binaryFiles: binaryFilesFor('tutorial')
 	},
 	typstStarter(
 		'typst-paper',
@@ -197,39 +165,5 @@ export async function applyStarter(root: string, starter: Starter): Promise<stri
 		if ((await statFile(path)).exists) continue; // keep the user's existing file
 		await writeTextFile(path, content);
 	}
-	for (const [rel, url] of Object.entries(starter.binaryFiles ?? {})) {
-		const path = joinPath(root, rel);
-		if ((await statFile(path)).exists) continue; // keep the user's existing file
-		const blob = await (await fetch(url)).blob();
-		await writeBinaryFile(path, blob);
-	}
 	return joinPath(root, starter.mainFile);
-}
-
-export type TutorialFolderState =
-	| 'empty' // nothing in it (or doesn't exist yet) - safe to populate
-	| 'ours' // already has all of the tutorial's own files - safe to just reopen
-	| 'occupied'; // has unrelated content - do not write into it silently
-
-/**
- * Checks a folder the user picked WITHOUT writing anything, so the caller can ask for
- * confirmation (or refuse) before applyStarter ever touches disk.
- */
-export async function checkTutorialFolder(root: string): Promise<{ root: string; state: TutorialFolderState }> {
-	if (!(await statFile(root)).exists) return { root, state: 'empty' };
-	const { children } = await scanTree(root);
-	if (children.length === 0) return { root, state: 'empty' };
-	const names = new Set(children.filter((c) => c.type === 'file').map((c) => c.name));
-	const tutorial = starterById('tutorial')!;
-	const isOurs = Object.keys(tutorial.files).every((rel) => names.has(rel));
-	return { root, state: isOurs ? 'ours' : 'occupied' };
-}
-
-/**
- * Writes (or reuses) the tutorial project at `root`. Caller must confirm first via
- * checkTutorialFolder - this never checks on its own, so it must not be called for 'occupied'.
- */
-export async function openTutorialProject(root: string): Promise<{ root: string; mainFile: string }> {
-	const mainFile = await applyStarter(root, starterById('tutorial')!);
-	return { root, mainFile };
 }

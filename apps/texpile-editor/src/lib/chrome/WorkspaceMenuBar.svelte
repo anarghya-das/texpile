@@ -72,8 +72,6 @@
 		onToggleTerminal?: () => void;
 		/** Reindent the current document via latexindent (opens the confirm-first modal). */
 		onFormatDocument?: () => void;
-		/** Open the bundled Texpile Tutorial project (switches the workspace to it). */
-		onOpenTutorial?: () => void;
 		/** whole-window zoom, shown as a percentage in the View menu. */
 		uiZoomPercent?: number;
 		onZoomIn?: () => void;
@@ -105,7 +103,6 @@
 		onNewTerminal,
 		onToggleTerminal,
 		onFormatDocument,
-		onOpenTutorial,
 		uiZoomPercent = 100,
 		onZoomIn,
 		onZoomOut,
@@ -235,7 +232,7 @@
 			format: formatMenuSelect,
 			spelling: spellcheckSelect,
 			terminal: terminalSelect,
-			help: (v) => (v === 'tutorial' ? onOpenTutorial?.() : helpSelect(v))
+			help: helpSelect
 		})
 	);
 	// what the native bar needs to know about this window; re-sent whenever any of it changes
@@ -264,7 +261,6 @@
 			canClone: !!onCloneRepository,
 			canLocalHistory: !!onLocalHistory,
 			fileOpen: !!activeFilePath.current,
-			canTutorial: !!onOpenTutorial,
 			recentFolders: recentFolders.current
 		})
 	);
@@ -363,7 +359,7 @@
 		<TerminalMenu index={6} select={terminalSelect} {terminalVisible} />
 	{/if}
 	{#if showAt(helpIndex, overflow)}
-		<HelpMenu index={helpIndex} select={(v) => (v === 'tutorial' ? onOpenTutorial?.() : helpSelect(v))} canTutorial={!!onOpenTutorial} />
+		<HelpMenu index={helpIndex} select={helpSelect} />
 	{/if}
 {/snippet}
 

@@ -18,15 +18,11 @@ import {
 	mainFile,
 	detectedMainFile,
 	savedMainFile,
-	setMainFile,
 	addRecentFolder
 } from '$lib/workspace/workspaceStore';
 import { detectMainFile, gatherProjectMacros } from '$lib/workspace/project';
 import { claimWorkspace, releaseWorkspace, pickFolder, samePath, statFile, type TexFile } from '$lib/workspace/fileSystem';
 import { warnMissingFolder } from '$lib/workspace/missingFolder';
-import { openTutorialProject } from '$lib/workspace/starters';
-import { toaster } from '$lib/modals/toaster-svelte';
-import { m } from '$lib/paraglide/messages';
 
 export type FolderLifecycleDeps = {
 	scanTexFiles(root: string): Promise<{ files: TexFile[] }>;
@@ -132,19 +128,6 @@ export class FolderLifecycle {
 		docPositions.bind(null, false);
 		visualDocCache.clear();
 		navigate('/');
-	}
-
-	/** TutorialConfirmModal has the user pick an empty folder and confirm first; this only runs after */
-	async openTutorial(pickedRoot: string): Promise<void> {
-		try {
-			const { root, mainFile: main } = await openTutorialProject(pickedRoot);
-			await this.open(root);
-			setMainFile(root, main);
-			this.deps.setMainConfirmed(true); // the starter picked the main; no first-compile question
-			openFile(main); // open() opens files[0] (alphabetical), not the main file
-		} catch (e) {
-			toaster.error({ title: m.wsview_toast_tutorial_failed_title(), description: e instanceof Error ? e.message : String(e) });
-		}
 	}
 
 	/**

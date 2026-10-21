@@ -58,7 +58,6 @@ export type MenuState = {
 	canLocalHistory?: boolean;
 	/** a file is open, for Local History… */
 	fileOpen?: boolean;
-	canTutorial: boolean;
 	recentFolders: string[];
 	/** the start screen (or another workspace-less screen): the bar offers only what opens a folder */
 	home?: boolean;
@@ -476,7 +475,6 @@ function template(win: BrowserWindow, s: MenuState): MenuItemConstructorOptions[
 			label: label(s, 'help', 'Help'),
 			submenu: [
 				{ label: label(s, 'shortcuts', 'Keyboard Shortcuts'), click: () => fire(win, 'help:shortcuts') },
-				...(s.canTutorial ? [{ label: label(s, 'tutorial', 'Open Tutorial'), click: () => fire(win, 'help:tutorial') }] : []),
 				{ label: label(s, 'whatsNew', "What's New"), click: () => fire(win, 'help:whatsnew') },
 				{ type: 'separator' },
 				{ label: label(s, 'documentation', 'Documentation'), click: () => fire(win, 'help:docs') },

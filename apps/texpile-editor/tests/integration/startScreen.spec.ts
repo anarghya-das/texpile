@@ -48,7 +48,6 @@ test.describe('the start screen', () => {
 		await expect(heading(page)).toBeVisible();
 		await expect(page.getByRole('img', { name: 'Texpile' }).first()).toBeAttached();
 		for (const name of ['Open Folder…', 'Join Session', 'New Window', 'Preferences…']) await expect(row(page, name), name).toBeVisible();
-		await expect(page.getByRole('button', { name: 'New here? Try the tutorial' })).toBeVisible();
 		await expect(page.getByText(/^Texpile v\d+\.\d+\.\d+/)).toBeVisible();
 		await expect(page.getByRole('button', { name: /^What's New/ })).toBeVisible();
 	});
@@ -150,15 +149,6 @@ test.describe('the start screen', () => {
 			.click();
 		await expect(prefs.header()).toHaveText('Editor');
 		await prefs.close();
-	});
-
-	test('the tutorial entry opens its dialog and Escape closes it', async () => {
-		const { page } = texpile();
-		await page.getByRole('button', { name: 'New here? Try the tutorial' }).click();
-		const dialog = page.getByRole('dialog').filter({ hasText: 'Open the Tutorial' });
-		await expect(dialog).toBeVisible();
-		await page.keyboard.press('Escape');
-		await expect(dialog).toBeHidden();
 	});
 
 	test("What's New opens the release notes and Escape closes them", async () => {

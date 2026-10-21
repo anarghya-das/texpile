@@ -10,12 +10,11 @@
 	import logoOnLight from '$branding/Logo-dark.svg';
 	import logoOnDark from '$branding/Logo-light.svg';
 	import { pickFolder, isDesktop, openNewWindow, basename } from '$lib/workspace/fileSystem';
-	import { recentFolders, setMainFile } from '$lib/workspace/workspaceStore';
+	import { recentFolders } from '$lib/workspace/workspaceStore';
 	import { onMount } from 'svelte';
 	import { mark } from '$lib/debug/startupDoctor';
 	import { openFolderInWindow } from '$lib/workspace/openWorkspace';
 	import { warnMissingFolder } from '$lib/workspace/missingFolder';
-	import { openTutorialProject } from '$lib/workspace/starters';
 	import { m } from '$lib/paraglide/messages';
 	import { takePreferencesReopen } from '$lib/stores/dialogStore';
 	import { RecentsFit } from './startRecentsFit.svelte';
@@ -31,19 +30,12 @@
 	let recentModalOpen = $state(false);
 	const fit = new RecentsFit(RECENT_COLLAPSED_COUNT);
 	const visibleRecents = $derived(recentFolders.current.slice(0, fit.count));
-	let tutorialModalOpen = $state(false);
 	let prefsOpen = $state(false); // the menu bar isn't on this screen, so settings need a way in from here
 	const appVersion = __APP_VERSION__; // injected by Vite from package.json
 
-	// both modals chain into the editor bundle (prefs reaches harper via spellcheck), so they
-	// load on first open instead of riding in the boot chunk
-	let TutorialModal = $state<typeof import('$lib/modals/start/TutorialConfirmModal.svelte').default | null>(null);
+	// prefs chains into the editor bundle (it reaches harper via spellcheck), so it loads on first open
+	// instead of riding in the boot chunk
 	let PrefsDialog = $state<typeof import('$lib/modals/window/PreferencesDialog.svelte').default | null>(null);
-
-	async function showTutorialModal() {
-		TutorialModal ??= (await import('$lib/modals/start/TutorialConfirmModal.svelte')).default;
-		tutorialModalOpen = true;
-	}
 
 	async function showPrefs() {
 		PrefsDialog ??= (await import('$lib/modals/window/PreferencesDialog.svelte')).default;
@@ -58,23 +50,6 @@
 	// and owns the error path
 	function preloadWorkspace() {
 		return void import('./workspace/WorkspaceView.svelte').catch(() => {});
-	}
-
-	// TutorialConfirmModal has the user pick an empty folder and confirm first; this only runs after
-	async function openTutorial(pickedRoot: string) {
-		if (busy) return;
-		busy = true;
-		error = null;
-		preloadWorkspace(); // ahead of the copy: the chunk streams while the template lands on disk
-		try {
-			const { root, mainFile } = await openTutorialProject(pickedRoot);
-			setMainFile(root, mainFile);
-			if ((await openFolderInWindow(root, mainFile)) === 'missing') error = m.start_error_tutorial();
-		} catch (e) {
-			error = e instanceof Error ? e.message : m.start_error_tutorial();
-		} finally {
-			busy = false;
-		}
 	}
 
 	async function openFolder(path?: string) {
@@ -173,15 +148,6 @@
 				<span>{m.menubar_preferences()}</span>
 			</button>
 
-			<!-- onboarding, not a primary action: light so it doesn't compete with the rows above -->
-			<button
-				class="text-muted hover:text-surface-950-50 mt-2 px-2 text-xs disabled:opacity-50"
-				onclick={showTutorialModal}
-				disabled={busy}
-			>
-				{m.start_tutorial_cta()}
-			</button>
-
 			{#if error}
 				<p class="text-error-ink mt-2 px-2 text-sm">{error}</p>
 			{/if}
@@ -230,9 +196,6 @@
 
 <RecentFoldersModal bind:open={recentModalOpen} folders={recentFolders.current} onPick={(folder) => openFolder(folder)} />
 
-{#if TutorialModal}
-	<TutorialModal bind:open={tutorialModalOpen} onConfirm={openTutorial} />
-{/if}
 {#if PrefsDialog}
 	<PrefsDialog bind:open={prefsOpen} />
 {/if}

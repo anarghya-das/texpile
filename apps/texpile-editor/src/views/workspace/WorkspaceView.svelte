@@ -16,7 +16,6 @@
 	import { bindRenames } from './writing/workspaceRename';
 	import { bindAddPackage } from './writing/workspaceAddPackage';
 	import type { TextEdit } from '$lib/workspace/edits/textEdits';
-	import TutorialConfirmModal from '$lib/modals/start/TutorialConfirmModal.svelte';
 	import { tabs, tabKey } from '$lib/workspace/tabs.svelte';
 	import { makeMainActions, makeChromeActions, makePaletteActions, type ActionSurfaceDeps } from './workspaceActionSurfaces';
 	import { collabHost } from '$lib/collab/hostStore.svelte';
@@ -149,8 +148,6 @@
 		mark('workspace');
 		return startWorkspace({ guest, hostMode, wsdoc, editFlow, files, cc, compiler, draftCtl, commentsCtl, layout, termDock });
 	});
-
-	let tutorialModalOpen = $state(false);
 
 	// $state (not const) because descendants bind into these objects' fields: svelte needs an
 	// assignable, reactive target to keep the ownership chain intact. Class instances are not
@@ -303,7 +300,6 @@
 		setDockView: (v) => (dockView = v),
 		getDockView: () => dockView,
 		setShareModalOpen: (open) => (shareModalOpen = open),
-		setTutorialModalOpen: (open) => (tutorialModalOpen = open),
 		openGlobalSearch: () => void openSearchPanel(searchDeps),
 		closeGlobalSearch: () => void closeSearchPanel(searchDeps),
 		replaceInFolder: makeFolderReplace(replaceWiring)
@@ -466,7 +462,6 @@
 	/>
 </div>
 
-<TutorialConfirmModal bind:open={tutorialModalOpen} onConfirm={(root) => void files.folder.openTutorial(root)} />
 {#if !guest}
 	<SessionShareModal bind:open={shareModalOpen} root={workspaceRoot.current} onBeforeStart={() => saver.flushAndWait()} />
 {/if}

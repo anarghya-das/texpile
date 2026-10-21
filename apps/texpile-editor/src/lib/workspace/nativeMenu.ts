@@ -74,7 +74,6 @@ export type MenuStateInput = {
 	canClone?: boolean;
 	canLocalHistory?: boolean;
 	fileOpen?: boolean;
-	canTutorial: boolean;
 	recentFolders: string[];
 };
 
@@ -178,7 +177,6 @@ function labels(tool: 'latexindent' | 'typstyle'): Record<string, string> {
 		newTerminal: m.menubar_new_terminal(),
 		showTerminal: m.menubar_show_terminal(),
 		shortcuts: m.menubar_keyboard_shortcuts(),
-		tutorial: m.menubar_open_tutorial(),
 		whatsNew: m.whatsnew_menu_label(),
 		documentation: m.menubar_documentation(),
 		discord: m.menubar_join_discord(),
