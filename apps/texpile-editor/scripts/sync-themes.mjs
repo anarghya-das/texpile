@@ -1,5 +1,6 @@
-// Copies Skeleton's preset themes into public/themes/ and writes themes/index.json: each theme's
-// name, label and the five colours a picker tile needs (its primary, both grounds, both panels).
+// Copies Skeleton's preset themes into public/themes/, writes Absolute from the default theme, and writes
+// themes/index.json: each theme's name, label and the five colours a picker tile needs (its primary, both grounds,
+// both panels).
 // Runs from `pnpm sync`, so the files track the installed Skeleton version instead of living in git.
 import { mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -21,6 +22,15 @@ function cappedCorners(css) {
 	);
 }
 
+// the default theme on neutral grays that end in pure white and pure black
+const ABSOLUTE_LIGHTNESS = { 50: 100, 100: 96.5, 200: 92, 300: 86, 400: 72, 500: 58, 600: 46, 700: 33, 800: 24, 900: 15, 950: 0 };
+function absoluteFrom(css) {
+	let out = css.replace("[data-theme='theme']", "[data-theme='absolute']");
+	for (const [step, l] of Object.entries(ABSOLUTE_LIGHTNESS))
+		out = out.replace(new RegExp(`(--color-surface-${step}): [^;]+;`), `$1: oklch(${l}% 0 none);`);
+	return out;
+}
+
 function swatch(css) {
 	const get = (name) => css.match(new RegExp(`${name}:\\s*([^;]+);`))?.[1].trim();
 	const s = {
@@ -33,7 +43,13 @@ function swatch(css) {
 	return Object.values(s).every(Boolean) ? s : null;
 }
 
-const entries = [{ name: 'theme', label: 'Texpile', swatch: swatch(readFileSync(join(root, 'texpile-default-theme.css'), 'utf8')) }];
+const defaultCss = readFileSync(join(root, 'texpile-default-theme.css'), 'utf8');
+const absoluteCss = absoluteFrom(defaultCss);
+writeFileSync(join(out, 'absolute.css'), absoluteCss);
+const entries = [
+	{ name: 'theme', label: 'Texpile', swatch: swatch(defaultCss) },
+	{ name: 'absolute', label: 'Absolute', swatch: swatch(absoluteCss) }
+];
 for (const file of readdirSync(src)
 	.filter((f) => f.endsWith('.css'))
 	.sort()) {
