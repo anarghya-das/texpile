@@ -219,6 +219,7 @@ html {
 	/* the PDF pane's chrome */
 	--pdf-viewer-bg: light-dark(var(--color-surface-100), var(--color-surface-950));
 	--pdf-page-area-bg: light-dark(var(--color-surface-100), var(--color-surface-950));
+	--page-shadow: 0 2px 8px light-dark(rgb(0 0 0 / 0.12), rgb(0 0 0 / 0.55)), 0 1px 3px light-dark(rgb(0 0 0 / 0.08), rgb(0 0 0 / 0.4));
 	/* the bar sits in the editor column's tab-strip row, so it wears the tab strip's band and the
 	   app's own text colour: at that height the thing beside it is the tab strip, not the toolbar */
 	--pdf-toolbar-bg: light-dark(var(--color-surface-100), var(--color-surface-900));

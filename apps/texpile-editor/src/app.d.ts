@@ -113,12 +113,26 @@ declare global {
 		/** a tool folder as absolute, relative (portable app, same drive) and real path, plus whether it exists */
 		dirForms(entry: string): Promise<{ absolute: string; relative: string | null; exists: boolean; real: string }>;
 		/** Fetch tinymist's preview page, theme it, re-serve it from typstpreview://. */
-		preparePreview(host: string, background: string, foreground: string): Promise<{ ok: boolean; url?: string; error?: string }>;
+		preparePreview(
+			host: string,
+			background: string,
+			foreground: string,
+			scrollbarThumb: string,
+			scrollbarRadius: number,
+			dark: boolean
+		): Promise<{ ok: boolean; url?: string; error?: string }>;
 		releasePreview(): void;
 		/** The raw page as tinymist serves it, for a session host to ship to guests. */
 		previewPageHtml(host: string): Promise<{ ok: boolean; html?: string; error?: string }>;
 		/** Serve the host-shipped page for this (guest) window's frame; networkless CSP. */
-		prepareGuestPreview(html: string, background: string, foreground: string): Promise<{ ok: boolean; url?: string; error?: string }>;
+		prepareGuestPreview(
+			html: string,
+			background: string,
+			foreground: string,
+			scrollbarThumb: string,
+			scrollbarRadius: number,
+			dark: boolean
+		): Promise<{ ok: boolean; url?: string; error?: string }>;
 		/** Preview relay (host side): one websocket leg to the preview data plane per guest. */
 		relayOpen(id: number, host: string): void;
 		relaySend(id: number, payload: string | ArrayBuffer): void;

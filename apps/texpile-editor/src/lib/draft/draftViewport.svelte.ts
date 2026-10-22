@@ -9,7 +9,7 @@ import { keepPointUnder } from '$lib/preview/zoom/zoomAnchor';
 export const PT2PX = 96 / 72.27;
 const MIN_ZOOM = 0.2;
 const MAX_ZOOM = 5;
-const PAGE_PAD = 16; // px gutter each side used by fit-width
+const PAGE_PAD = 20; // px gutter each side used by fit-width
 const WINDOW_PAD = 2;
 const FOLLOW_ZOOM = 1.08; // a tiny magnification above fit-width, the follow resting level
 

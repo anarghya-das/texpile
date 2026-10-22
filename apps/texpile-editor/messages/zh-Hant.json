@@ -1278,7 +1278,6 @@
 	"draft_toolbar_prev_page": "上一頁",
 	"draft_toolbar_next_page": "下一頁",
 	"draft_toolbar_page_aria": "目前頁",
-	"draft_page_label": "第 {n} 頁",
 	"blockhandle_insert_below": "在下方插入區塊",
 	"blockhandle_insert_header": "插入區塊",
 	"blockhandle_drag_move": "拖曳以移動",

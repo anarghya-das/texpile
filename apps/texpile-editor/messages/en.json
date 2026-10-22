@@ -1278,7 +1278,6 @@
 	"draft_toolbar_prev_page": "Previous page",
 	"draft_toolbar_next_page": "Next page",
 	"draft_toolbar_page_aria": "Current page",
-	"draft_page_label": "page {n}",
 	"blockhandle_insert_below": "Insert block below",
 	"blockhandle_insert_header": "Insert Block",
 	"blockhandle_drag_move": "Drag to move",

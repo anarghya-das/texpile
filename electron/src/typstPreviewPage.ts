@@ -11,6 +11,8 @@
 //
 // Kept free of electron imports so it can be unit tested as plain string work.
 
+import { pageShadow, withPdfSpacing } from './typstPreviewLook';
+
 /** how the prepared page should look and what it should talk to */
 export type PreparePageOptions = {
 	/** `host:port` of tinymist's data plane, e.g. `127.0.0.1:52145` */
@@ -19,6 +21,9 @@ export type PreparePageOptions = {
 	background: string;
 	/** text colour for anything the page draws itself */
 	foreground: string;
+	scrollbarThumb: string;
+	scrollbarRadius: number;
+	dark: boolean;
 };
 
 /**
@@ -58,17 +63,8 @@ function injection(opts: PreparePageOptions): string {
 		--typst-preview-background-color: ${opts.background} !important;
 		--typst-preview-foreground-color: ${opts.foreground} !important;
 	}
-	/* The paper edge tinymist leaves out: its viewer fits every page to the pane width, stacks
-	   them a mere 5px apart and paints them all white, so the surround we theme has almost
-	   nowhere to show and the document reads as one endless white sheet. The page rect is an
-	   SVG element, which means a stylesheet stroke can draw its edge - no reaching into the
-	   viewer required. Coordinates inside the rect are scaled by 100 (INNER_RECT_UNIT in their
-	   typst-doc.svg.mts), so 300 here is 3pt - sized for the OUTER half being all that reliably
-	   shows, since the page's own content paints over the inner half. */
-	rect.typst-page-inner {
-		stroke: ${opts.foreground};
-		stroke-opacity: 0.5;
-		stroke-width: 300px;
+	#typst-container svg:not(svg *) {
+		filter: ${pageShadow(opts.dark)};
 	}
 	/* tinymist puts the grab hand on the paper. Chromium draws that hand from its own bitmap, and when
 	   the pointer reaches the frame across the pane splitter (a col-resize system cursor) the bitmap
@@ -86,16 +82,16 @@ function injection(opts: PreparePageOptions): string {
 		background: transparent;
 	}
 	::-webkit-scrollbar-thumb {
-		background-color: color-mix(in oklab, ${opts.foreground} 30%, transparent);
-		border-radius: 5px;
+		background-color: color-mix(in oklab, ${opts.scrollbarThumb} 30%, transparent);
+		border-radius: ${opts.scrollbarRadius}px;
 		border: 2px solid transparent;
 		background-clip: padding-box;
 	}
 	::-webkit-scrollbar-thumb:hover {
-		background-color: color-mix(in oklab, ${opts.foreground} 45%, transparent);
+		background-color: color-mix(in oklab, ${opts.scrollbarThumb} 45%, transparent);
 	}
 	html.texpile-inverted #typst-container svg:not(svg *) {
-		filter: invert(94%) hue-rotate(180deg);
+		filter: invert(94%) hue-rotate(180deg) ${pageShadow(opts.dark)};
 	}
 </style>
 <script id="texpile-bridge">
@@ -398,6 +394,8 @@ export function preparePreviewPage(html: string, opts: PreparePageOptions): stri
 	} else {
 		throw new PreviewPageError('tinymist preview page has neither the derived nor the placeholder websocket address');
 	}
+
+	out = withPdfSpacing(out);
 
 	// last thing in the body, so the viewer's own script has already defined everything we reach for
 	const inject = injection(opts);

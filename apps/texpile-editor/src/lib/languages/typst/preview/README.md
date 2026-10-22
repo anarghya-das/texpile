@@ -28,15 +28,15 @@ Because nothing here reads the file. A standalone `tinymist preview` watches the
 can only ever show _saved_ text. Started through the language server instead, the preview renders
 the server's **in-memory** document, which both editors keep current with `textDocument/didChange`:
 the source editor through its LSP plugin, the visual editor through `TypstDocumentStream`
-(`../intellisense/typstDocumentStream.ts`), which sends the text it serializes to once typing pauses
-for 200ms. Without that stream the visual editor left the server reading the disk: an autosave
+(`../intellisense/typstDocumentStream.ts`), which sends the text it serializes to as it is typed.
+Without that stream the visual editor left the server reading the disk: an autosave
 behind, plus the file watcher's ~1.5s.
 
 Both hold the same open document (`../intellisense/typstWorkspace.ts`), so a mode switch hands it
 from one to the other without closing it, and its versions keep climbing.
 
 Measured against tinymist 0.15: an in-memory edit produced a new `diff-v1` frame **6-20ms** later,
-with the file on disk untouched. The only timers in the path are the editors' sync debounces.
+with the file on disk untouched. Both editors send each change as it is typed, as VS Code does.
 
 While a preview is attached, `WorkspaceView` skips the debounced `runTypstLive` recompile entirely;
 that fallback only exists for when this pane is not showing.

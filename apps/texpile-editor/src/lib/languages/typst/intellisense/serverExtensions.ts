@@ -1,9 +1,24 @@
-import { findReferencesKeymap, formatKeymap, hoverTooltips, renameKeymap, serverDiagnostics, signatureHelp } from '@codemirror/lsp-client';
-import { keymap } from '@codemirror/view';
+import {
+	findReferencesKeymap,
+	formatKeymap,
+	hoverTooltips,
+	LSPPlugin,
+	renameKeymap,
+	serverDiagnostics,
+	signatureHelp
+} from '@codemirror/lsp-client';
+import { keymap, ViewPlugin } from '@codemirror/view';
 import { typstCompletion } from './completion/typstCompletionSource';
+
+const syncOnChange = ViewPlugin.define(() => ({
+	update(u) {
+		if (u.docChanged) queueMicrotask(() => LSPPlugin.get(u.view)?.client.sync());
+	}
+}));
 
 export function typstServerExtensions() {
 	return [
+		syncOnChange,
 		typstCompletion(),
 		hoverTooltips(),
 		// no jumpToDefinitionKeymap: F12 is typstGoTo's (goToDefinition.ts), which reads tinymist's

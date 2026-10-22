@@ -20,7 +20,7 @@
 	import { resolvedMode, themeEpoch } from '$lib/theme';
 	import { settings, updateSettings } from '$lib/settings';
 	import { followScrollTick, guestJumpFreezeTick } from './followSignal';
-	import { themeColour } from './themeColour';
+	import { scrollbarRadius, textColour, themeColour } from './themeColour';
 	import { askForProgram, tinymistMissing } from '$lib/modals/window/missingProgram/missingProgram.svelte';
 	import { m } from '$lib/paraglide/messages';
 
@@ -65,15 +65,20 @@
 
 	const dark = $derived(resolvedMode.current === 'dark');
 
-	// The surround behind the pages, and it has to CONTRAST with them: the viewer draws white paper
-	// and nothing else, so a near-white surround makes the page edges vanish and the document reads
-	// as one endless sheet. surface-300 in light, surface-800 in dark - dark enough to separate the
-	// pages, short of the near-black surface-950 the PDF pane uses, which reads as a hole.
 	// tracked on the theme epoch too: the probe reads computed colours, which change once a chosen
 	// theme's stylesheet has loaded, not when its name does
 	const background = $derived.by(() => {
 		void themeEpoch.current;
-		return dark ? themeColour('--color-surface-800', '#27272a') : themeColour('--color-surface-300', '#d4d4d8');
+		return themeColour('--solid-pdf-page-area-bg', dark ? '#09090b' : '#f4f4f5');
+	});
+	const scrollbarThumb = $derived.by(() => {
+		void themeEpoch.current;
+		void dark;
+		return textColour(dark ? '#fafafa' : '#18181b');
+	});
+	const cornerRadius = $derived.by(() => {
+		void themeEpoch.current;
+		return scrollbarRadius();
 	});
 	const foreground = $derived.by(() => {
 		void themeEpoch.current;
@@ -86,6 +91,9 @@
 		if (!h) return;
 		const bg = background;
 		const fg = foreground;
+		const thumb = scrollbarThumb;
+		const radius = cornerRadius;
+		const isDark = dark;
 		let cancelled = false;
 		frameUrl = null;
 		error = null;
@@ -101,7 +109,7 @@
 			return;
 		}
 
-		bridge.preparePreview(h, bg, fg).then(
+		bridge.preparePreview(h, bg, fg, thumb, radius, isDark).then(
 			(res) => {
 				if (cancelled) return;
 				if (res?.ok && res.url) frameUrl = res.url;
@@ -217,7 +225,7 @@
 	});
 </script>
 
-<div class="bg-surface-200-800 flex h-full w-full flex-col">
+<div class="flex h-full w-full flex-col bg-(--pdf-page-area-bg)">
 	<!-- in the "..." it would be a line of text among actions: it gives way instead, unless it is a problem -->
 	{#snippet status(place: PreviewToolbarPlace = 'bar')}
 		{#if place === 'bar'}

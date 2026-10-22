@@ -90,7 +90,11 @@ async function open(
 
 /** a folder picked on the start screen, or pushed at a window that is already running. `want` is
  *  the file to land on; omit it for whichever tab was focused there last. */
-export function openFolderInWindow(root: string, want?: string | null): Promise<OpenOutcome> {
+export async function openFolderInWindow(root: string, want?: string | null): Promise<OpenOutcome> {
+	if (switchFolder) {
+		await switchFolder(root, want ?? undefined);
+		return 'opened';
+	}
 	fileMode.current = false;
 	return want === undefined ? open(root, savedLastFile(root), savedLastCompare(root)) : open(root, want);
 }
@@ -114,8 +118,8 @@ export async function projectRootFor(filePath: string): Promise<string> {
 
 /** the open workspace's own folder switch, which claims the folder and sets its project up, as a lone file's window
  *  never did; the returned function lets go */
-let switchFolder: ((root: string, want: string) => Promise<void>) | null = null;
-export function provideFolderSwitch(fn: (root: string, want: string) => Promise<void>): () => void {
+let switchFolder: ((root: string, want?: string) => Promise<void>) | null = null;
+export function provideFolderSwitch(fn: (root: string, want?: string) => Promise<void>): () => void {
 	switchFolder = fn;
 	return () => {
 		if (switchFolder === fn) switchFolder = null;

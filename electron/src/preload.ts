@@ -440,14 +440,20 @@ contextBridge.exposeInMainWorld('texpileTypst', {
 		return () => ipcRenderer.removeListener('typst:tinymist:finished', h);
 	},
 	/** fetch tinymist's preview page, theme it, and re-serve it; resolves to a typstpreview:// URL. */
-	preparePreview: (host: string, background: string, foreground: string) =>
-		ipcRenderer.invoke('typst:preview:prepare', { host, background, foreground }),
+	preparePreview: (host: string, background: string, foreground: string, scrollbarThumb: string, scrollbarRadius: number, dark: boolean) =>
+		ipcRenderer.invoke('typst:preview:prepare', { host, background, foreground, scrollbarThumb, scrollbarRadius, dark }),
 	releasePreview: () => ipcRenderer.send('typst:preview:release'),
 	/** the raw page as tinymist serves it, for a session host to ship to guests. */
 	previewPageHtml: (host: string) => ipcRenderer.invoke('typst:preview:pageHtml', { host }),
 	/** serve the host-shipped page for this (guest) window's frame; networkless CSP. */
-	prepareGuestPreview: (html: string, background: string, foreground: string) =>
-		ipcRenderer.invoke('typst:preview:prepareGuest', { html, background, foreground }),
+	prepareGuestPreview: (
+		html: string,
+		background: string,
+		foreground: string,
+		scrollbarThumb: string,
+		scrollbarRadius: number,
+		dark: boolean
+	) => ipcRenderer.invoke('typst:preview:prepareGuest', { html, background, foreground, scrollbarThumb, scrollbarRadius, dark }),
 
 	// ---- preview relay (host side): websocket legs to the preview task's data plane, one per
 	// guest. `id` is this window's handle; traffic is opaque bytes both ways. ----

@@ -67,11 +67,14 @@
 		props.split && height > 1 && pane() !== null && props.link && Math.abs(paneHeight - props.link.columnHeight) <= 1 ? props.link : null
 	);
 	const fraction = $derived(link ? clamped((link.at - below) / (height - 1)) : props.fraction);
+	const own = $state<{ lit: 'idle' | 'hover' | 'drag' }>({ lit: 'idle' });
+	const lighting = $derived(link ?? own);
 	// the split turned off, or the editors stopped lining up, while the divider was lit
 	$effect(() => {
-		const shared = link;
+		const shared = lighting;
+		void props.split;
 		return () => {
-			if (shared && shared.lit !== 'drag') shared.lit = 'idle';
+			if (shared.lit !== 'drag') shared.lit = 'idle';
 		};
 	});
 	function onPointerDown(event: PointerEvent) {
@@ -83,14 +86,15 @@
 		const top = pane() ?? 0;
 		// pressed on the lower bar's edge, below the divider: it moves with the pointer from where it is, not to it
 		const offset = link ? event.clientY - top - link.at : event.clientY - (area.top + fraction * area.height);
-		if (link) link.lit = 'drag';
+		const lights = lighting;
+		lights.lit = 'drag';
 		function move(e: PointerEvent): void {
 			if (link) link.moveTo(e.clientY - top - offset);
 			else resizeTo((e.clientY - offset - area.top) / area.height);
 		}
 		// capture goes on release and on a cancelled pointer alike: either ends the drag
 		function up(): void {
-			if (link) link.lit = 'idle';
+			lights.lit = 'idle';
 			handle.removeEventListener('pointermove', move);
 			handle.removeEventListener('lostpointercapture', up);
 		}
@@ -115,14 +119,14 @@
 			<!-- a focusable separator is the ARIA pattern for a splitter; svelte counts it as non-interactive -->
 			<!-- svelte-ignore a11y_no_noninteractive_tabindex, a11y_no_noninteractive_element_interactions -->
 			<div
-				class="hover:bg-primary-wash active:bg-primary-flood absolute inset-x-0 -top-[3px] h-[7px] cursor-row-resize transition-colors {link?.lit ===
+				class="hover:bg-primary-wash active:bg-primary-flood absolute inset-x-0 -top-[3px] h-[7px] cursor-row-resize transition-colors {lighting.lit ===
 				'drag'
 					? 'bg-primary-flood'
-					: link?.lit === 'hover'
+					: lighting.lit === 'hover'
 						? 'bg-primary-wash'
 						: ''}"
-				onpointerenter={() => link && link.lit !== 'drag' && (link.lit = 'hover')}
-				onpointerleave={() => link && link.lit !== 'drag' && (link.lit = 'idle')}
+				onpointerenter={() => lighting.lit !== 'drag' && (lighting.lit = 'hover')}
+				onpointerleave={() => lighting.lit !== 'drag' && (lighting.lit = 'idle')}
 				role="separator"
 				aria-orientation="horizontal"
 				aria-label={m.pdf_split_resize()}
@@ -134,15 +138,15 @@
 			{#if props.edge}
 				<!-- the lower view's bar reads as part of the divider, so its bottom edge drags it too -->
 				<div
-					class="hover:bg-primary-wash active:bg-primary-flood absolute inset-x-0 h-[7px] cursor-row-resize transition-colors {link?.lit ===
+					class="hover:bg-primary-wash active:bg-primary-flood absolute inset-x-0 h-[7px] cursor-row-resize transition-colors {lighting.lit ===
 					'drag'
 						? 'bg-primary-flood'
-						: link?.lit === 'hover'
+						: lighting.lit === 'hover'
 							? 'bg-primary-wash'
 							: ''}"
 					style="top: {props.edge - 3}px"
-					onpointerenter={() => link && link.lit !== 'drag' && (link.lit = 'hover')}
-					onpointerleave={() => link && link.lit !== 'drag' && (link.lit = 'idle')}
+					onpointerenter={() => lighting.lit !== 'drag' && (lighting.lit = 'hover')}
+					onpointerleave={() => lighting.lit !== 'drag' && (lighting.lit = 'idle')}
 					onpointerdown={onPointerDown}
 					ondblclick={() => (link ? link.even() : props.onResize(0.5))}
 					aria-hidden="true"

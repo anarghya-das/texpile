@@ -82,6 +82,11 @@ async function ensurePageServer(): Promise<number> {
  * the preview's surround and its page edges invisible. A colour space this function has not heard
  * of must still pass.
  */
+function cssLength(v: unknown): number {
+	const n = Number(v);
+	return Number.isFinite(n) ? Math.min(Math.max(n, 0), 20) : 5;
+}
+
 function cssColour(v: unknown): string {
 	const s = String(v ?? '').trim();
 	return s.length <= 100 && /^[a-zA-Z#][a-zA-Z0-9#(),.%/\s-]*$/.test(s) ? s : '#ffffff';
@@ -99,26 +104,35 @@ function forgetPageOnClose(sender: WebContents): void {
 }
 
 export function registerTypstPreviewIpc(): void {
-	ipcMain.handle('typst:preview:prepare', async (e, body: { host: string; background: string; foreground: string }) => {
-		// only ever tinymist's loopback preview server, never an address from anywhere else
-		if (!/^127\.0\.0\.1:\d+$/.test(body?.host ?? '')) return { ok: false, error: 'refusing a non-loopback preview host' };
-		try {
-			const res = await fetch(`http://${body.host}/`, { signal: AbortSignal.timeout(15000) });
-			if (!res.ok) return { ok: false, error: `preview server answered ${res.status}` };
-			const page = typstPreviewPage.preparePreviewPage(await res.text(), {
-				dataPlaneHost: body.host,
-				background: cssColour(body.background),
-				foreground: cssColour(body.foreground)
-			});
-			preparedPages.set(e.sender.id, { html: page, csp: HOST_PAGE_CSP });
-			forgetPageOnClose(e.sender);
-			const port = await ensurePageServer();
-			// one page per window, so the id keeps windows from seeing each other's preview
-			return { ok: true, url: `http://127.0.0.1:${port}/${e.sender.id}` };
-		} catch (err) {
-			return { ok: false, error: String(err instanceof Error ? err.message : err) };
+	ipcMain.handle(
+		'typst:preview:prepare',
+		async (
+			e,
+			body: { host: string; background: string; foreground: string; scrollbarThumb: string; scrollbarRadius: number; dark: boolean }
+		) => {
+			// only ever tinymist's loopback preview server, never an address from anywhere else
+			if (!/^127\.0\.0\.1:\d+$/.test(body?.host ?? '')) return { ok: false, error: 'refusing a non-loopback preview host' };
+			try {
+				const res = await fetch(`http://${body.host}/`, { signal: AbortSignal.timeout(15000) });
+				if (!res.ok) return { ok: false, error: `preview server answered ${res.status}` };
+				const page = typstPreviewPage.preparePreviewPage(await res.text(), {
+					dataPlaneHost: body.host,
+					background: cssColour(body.background),
+					foreground: cssColour(body.foreground),
+					scrollbarThumb: cssColour(body.scrollbarThumb),
+					scrollbarRadius: cssLength(body.scrollbarRadius),
+					dark: body.dark === true
+				});
+				preparedPages.set(e.sender.id, { html: page, csp: HOST_PAGE_CSP });
+				forgetPageOnClose(e.sender);
+				const port = await ensurePageServer();
+				// one page per window, so the id keeps windows from seeing each other's preview
+				return { ok: true, url: `http://127.0.0.1:${port}/${e.sender.id}` };
+			} catch (err) {
+				return { ok: false, error: String(err instanceof Error ? err.message : err) };
+			}
 		}
-	});
+	);
 
 	ipcMain.on('typst:preview:release', (e) => preparedPages.delete(e.sender.id));
 
@@ -137,22 +151,31 @@ export function registerTypstPreviewIpc(): void {
 
 	// a GUEST serving the host-shipped page for its own frame. Same loopback server, but under the
 	// no-network CSP: this html crossed the session, so it renders and posts to its parent - nothing else.
-	ipcMain.handle('typst:preview:prepareGuest', async (e, body: { html: string; background: string; foreground: string }) => {
-		// ~1.6MB is the page's natural size; 16MB bounds what a hostile host can park in this map
-		if (typeof body?.html !== 'string' || body.html.length > 16 * 1024 * 1024) return { ok: false, error: 'refusing an oversized page' };
-		try {
-			const page = typstPreviewPage.prepareGuestPreviewPage(body.html, {
-				background: cssColour(body.background),
-				foreground: cssColour(body.foreground)
-			});
-			preparedPages.set(e.sender.id, { html: page, csp: GUEST_PAGE_CSP });
-			forgetPageOnClose(e.sender);
-			const port = await ensurePageServer();
-			return { ok: true, url: `http://127.0.0.1:${port}/${e.sender.id}` };
-		} catch (err) {
-			return { ok: false, error: String(err instanceof Error ? err.message : err) };
+	ipcMain.handle(
+		'typst:preview:prepareGuest',
+		async (
+			e,
+			body: { html: string; background: string; foreground: string; scrollbarThumb: string; scrollbarRadius: number; dark: boolean }
+		) => {
+			// ~1.6MB is the page's natural size; 16MB bounds what a hostile host can park in this map
+			if (typeof body?.html !== 'string' || body.html.length > 16 * 1024 * 1024) return { ok: false, error: 'refusing an oversized page' };
+			try {
+				const page = typstPreviewPage.prepareGuestPreviewPage(body.html, {
+					background: cssColour(body.background),
+					foreground: cssColour(body.foreground),
+					scrollbarThumb: cssColour(body.scrollbarThumb),
+					scrollbarRadius: cssLength(body.scrollbarRadius),
+					dark: body.dark === true
+				});
+				preparedPages.set(e.sender.id, { html: page, csp: GUEST_PAGE_CSP });
+				forgetPageOnClose(e.sender);
+				const port = await ensurePageServer();
+				return { ok: true, url: `http://127.0.0.1:${port}/${e.sender.id}` };
+			} catch (err) {
+				return { ok: false, error: String(err instanceof Error ? err.message : err) };
+			}
 		}
-	});
+	);
 
 	// preview relay (host side of a shared session): one websocket per guest to the preview task's
 	// data plane; see typstPreviewRelay.ts.

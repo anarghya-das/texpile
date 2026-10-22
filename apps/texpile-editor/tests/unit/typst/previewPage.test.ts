@@ -3,7 +3,14 @@
 import { describe, it, expect } from 'vitest';
 import { preparePreviewPage, prepareGuestPreviewPage, PreviewPageError } from '../../../../../electron/src/typstPreviewPage';
 
-const OPTS = { dataPlaneHost: '127.0.0.1:52145', background: '#131316', foreground: '#e4e4e7' };
+const OPTS = {
+	dataPlaneHost: '127.0.0.1:52145',
+	background: '#131316',
+	foreground: '#e4e4e7',
+	scrollbarThumb: '#fafafa',
+	scrollbarRadius: 5,
+	dark: false
+};
 
 /** the shape the static server serves: the socket address is derived from the page's own URL */
 const SERVED = `<html><body><script>
@@ -57,11 +64,9 @@ describe('the injected payload', () => {
 		expect(out).toMatch(/--typst-preview-foreground-color:\s*#e4e4e7\s*!important/);
 	});
 
-	it('strokes the page rect, or two white pages on a light surround read as one sheet', () => {
-		// measured: the viewer stacks pages 5pt apart with no border of their own (tinymist keeps
-		// theirs commented out), so the page break is invisible without this edge
+	it('shadows the pages as the PDF viewer does, or two white pages on a light surround read as one sheet', () => {
 		const out = preparePreviewPage(SERVED, OPTS);
-		expect(out).toMatch(/rect\.typst-page-inner\s*\{[^}]*stroke:\s*#e4e4e7/);
+		expect(out).toMatch(/svg:not\(svg \*\)\s*\{\s*filter:\s*drop-shadow\(0 2px 8px rgb\(0 0 0 \/ 0\.12\)\)/);
 	});
 
 	it('swallows the jump ripple inside a quiet window, or follow strobes a circle per keystroke', () => {
@@ -99,7 +104,7 @@ describe('the injected payload', () => {
 });
 
 describe('the guest page', () => {
-	const GUEST_OPTS = { background: '#131316', foreground: '#e4e4e7' };
+	const GUEST_OPTS = { background: '#131316', foreground: '#e4e4e7', scrollbarThumb: '#fafafa', scrollbarRadius: 5, dark: false };
 
 	it('replaces the network layer with the postMessage shim', () => {
 		const out = prepareGuestPreviewPage(SERVED, GUEST_OPTS);

@@ -109,7 +109,7 @@ export async function startTypstPreview(root: string | null, file: string): Prom
 	try {
 		const res = await client.request<{ command: string; arguments: unknown[] }, StartPreviewResponse>('workspace/executeCommand', {
 			command: 'tinymist.doStartPreview',
-			arguments: [['--task-id', taskId, '--data-plane-host', '127.0.0.1:0', '--no-open', file]]
+			arguments: [['--task-id', taskId, '--data-plane-host', '127.0.0.1:0', '--partial-rendering', 'true', '--no-open', file]]
 		});
 		const host = res?.staticServerAddr ?? (res?.dataPlanePort ? `127.0.0.1:${res.dataPlanePort}` : null);
 		// only a preview that actually started keeps its reference; every other exit hands it back,

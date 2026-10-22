@@ -31,7 +31,7 @@
 	import { PreviewStream, type PreviewPayload } from '$lib/collab/protocol';
 	import { settings, updateSettings } from '$lib/settings';
 	import { followScrollTick } from './followSignal';
-	import { themeColour } from './themeColour';
+	import { scrollbarRadius, textColour, themeColour } from './themeColour';
 	import { m } from '$lib/paraglide/messages';
 
 	type Props = {
@@ -71,7 +71,16 @@
 	// theme's stylesheet has loaded, not when its name does
 	const background = $derived.by(() => {
 		void themeEpoch.current;
-		return dark ? themeColour('--color-surface-800', '#27272a') : themeColour('--color-surface-300', '#d4d4d8');
+		return themeColour('--solid-pdf-page-area-bg', dark ? '#09090b' : '#f4f4f5');
+	});
+	const scrollbarThumb = $derived.by(() => {
+		void themeEpoch.current;
+		void dark;
+		return textColour(dark ? '#fafafa' : '#18181b');
+	});
+	const cornerRadius = $derived.by(() => {
+		void themeEpoch.current;
+		return scrollbarRadius();
 	});
 	const foreground = $derived.by(() => {
 		void themeEpoch.current;
@@ -94,6 +103,9 @@
 		if (!html) return;
 		const bg = background;
 		const fg = foreground;
+		const thumb = scrollbarThumb;
+		const radius = cornerRadius;
+		const isDark = dark;
 		let cancelled = false;
 		frameUrl = null;
 		error = null;
@@ -102,7 +114,7 @@
 			error = m.typst_preview_unavailable();
 			return;
 		}
-		bridge.prepareGuestPreview(html, bg, fg).then(
+		bridge.prepareGuestPreview(html, bg, fg, thumb, radius, isDark).then(
 			(res) => {
 				if (cancelled) return;
 				if (res?.ok && res.url) frameUrl = res.url;
@@ -260,7 +272,7 @@
 	});
 </script>
 
-<div class="bg-surface-200-800 flex h-full w-full flex-col">
+<div class="flex h-full w-full flex-col bg-(--pdf-page-area-bg)">
 	<!-- the local pane's row, minus what a guest cannot do: no Save as PDF (the exporter is the
 	     host's tinymist). Zoom is local to this viewer; follow works (see the toggle below). -->
 	<!-- in the "..." it would be a line of text among actions: it gives way instead, unless it is a problem -->

@@ -134,24 +134,19 @@ describe("the visual editor's document stream", () => {
 		flushSync();
 	}
 
-	it('sends a typing burst as one debounced didChange, versions climbing', async () => {
+	it('sends what is typed at once, versions climbing', async () => {
 		await startServer();
 		startStream();
 		await settle();
 		expect(kinds(fileUri(MAIN))).toEqual(['open']);
 
-		edit('= One t');
-		edit('= One tw');
 		edit('= One two');
-		await settle(150);
-		expect(kinds(fileUri(MAIN))).toEqual(['open']); // still typing
-
-		await settle(100);
+		await settle();
 		expect(kinds(fileUri(MAIN))).toEqual(['open', 'change']);
 		expect(serverText(fileUri(MAIN))).toBe('= One two');
 
 		edit('= One two three');
-		await settle(250);
+		await settle();
 		expect(versions(fileUri(MAIN))).toEqual([1, 2, 3]);
 		expect(serverText(fileUri(MAIN))).toBe('= One two three');
 	});
@@ -200,18 +195,16 @@ describe("the visual editor's document stream", () => {
 		expect(serverText(fileUri(MAIN))).toBe('= Visual then source! and visual again');
 	});
 
-	it("leaves the source editor's syncing to its own plugin", async () => {
+	it("sends the source editor's typing at once", async () => {
 		await startServer();
 		startStream();
 		const view = await mountSourceEditor(MAIN, '= One');
 		await settle();
-		// source typing lands in the buffer too, which the stream follows, but must not time
 		typeInto(view, ' two');
 		edit('= One two');
-		await settle(250);
-		expect(kinds(fileUri(MAIN))).toEqual(['open']);
-		await settle(300); // the plugin's own 500ms
+		await settle();
 		expect(kinds(fileUri(MAIN))).toEqual(['open', 'change']);
+		expect(serverText(fileUri(MAIN))).toBe('= One two');
 		view.destroy();
 	});
 

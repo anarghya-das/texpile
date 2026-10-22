@@ -14,7 +14,6 @@
 	import { tip } from '$lib/components/tooltip.svelte';
 	import { m } from '$lib/paraglide/messages';
 	import { savePdfBytes } from '$lib/workspace/fileSystem';
-	import { resolvedMode } from '$lib/theme';
 	import { layout, updateLayout } from '$lib/storage/layout';
 	import { pagesInverted } from './invertColors/pagesInverted';
 	import { untrack, type Snippet } from 'svelte';
@@ -42,7 +41,6 @@
 	const inEditor = $derived(placement === 'file');
 	// the preview splits; a .pdf opened as a tab is a file like any other
 	const splittable = $derived(placement !== 'file');
-	const dark = $derived(resolvedMode.current === 'dark');
 	const inverted = $derived(pagesInverted());
 
 	let actions: PdfViewerActions | null = null;
@@ -211,7 +209,7 @@
 						)}
 					>
 						<PdfViewScope {place}><PdfSearchBar open={finds[place]} onClose={() => (finds[place] = false)} /></PdfViewScope>
-						<!-- darkMode inverts the page canvases; the chrome always follows the app theme via `dark`.
+						<!-- darkMode inverts the page canvases.
 						     the scrollbar repeats app.css's, whose rule cannot reach into the shadow DOM -->
 						<ColorVisionFilter class="flex min-h-0 flex-1 flex-col">
 							<PdfRenderer
@@ -219,7 +217,7 @@
 									onPageClick?.(page, x, y, text, splittable && layout.current.pdfSplit ? place : undefined)}
 								darkMode={inverted}
 								backgroundColor="var(--pdf-page-area-bg)"
-								pageShadow={dark ? '0 2px 8px rgba(0, 0, 0, 0.55), 0 1px 3px rgba(0, 0, 0, 0.4)' : undefined}
+								pageShadow="var(--page-shadow)"
 								scrollbarThumbColor="color-mix(in oklab, var(--color-surface-950-50) 30%, transparent)"
 								scrollbarTrackColor="transparent"
 								scrollbarThumbHoverColor="color-mix(in oklab, var(--color-surface-950-50) 45%, transparent)"

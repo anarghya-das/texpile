@@ -20,6 +20,21 @@ export function themeColour(name: string, fallback: string): string {
 	return (v && toRgb(v)) || fallback;
 }
 
+export function textColour(fallback: string): string {
+	if (typeof document === 'undefined') return fallback;
+	return toRgb(getComputedStyle(document.body).color) || fallback;
+}
+
+export function scrollbarRadius(): number {
+	if (typeof document === 'undefined') return 5;
+	const probe = document.createElement('div');
+	probe.style.borderRadius = 'calc(var(--radius-base) * 1.25)';
+	document.documentElement.appendChild(probe);
+	const px = parseFloat(getComputedStyle(probe).borderTopLeftRadius);
+	probe.remove();
+	return Number.isFinite(px) ? px : 5;
+}
+
 function toRgb(css: string): string | null {
 	const ctx = document.createElement('canvas').getContext('2d', { willReadFrequently: true });
 	if (!ctx) return null;

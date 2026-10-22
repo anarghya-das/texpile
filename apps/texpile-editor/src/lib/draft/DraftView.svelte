@@ -132,7 +132,7 @@
 	$effect(() => compiler.attachPreempt());
 </script>
 
-<div class="bg-surface-200-800 flex h-full w-full flex-col">
+<div class="flex h-full w-full flex-col bg-(--pdf-page-area-bg)">
 	<!-- in the "..." it would be a line of text among actions: it gives way instead, unless it is a problem -->
 	{#snippet status(place: PreviewToolbarPlace = 'bar')}
 		{#if place === 'bar'}
@@ -288,10 +288,10 @@
 			bind:this={vp.scroller}
 			bind:clientWidth={vp.containerW}
 			onscroll={() => vp.onScroll()}
-			class="flex flex-1 [scrollbar-gutter:stable] flex-col items-center-safe gap-4 overflow-auto p-4"
+			class="flex flex-1 [scrollbar-gutter:stable] flex-col items-center-safe gap-4 overflow-auto p-5"
 		>
 			{#each ctrl.pages as p (p.n)}
-				<div class="relative shadow-lg">
+				<div class="relative rounded-[2px] shadow-(--page-shadow)">
 					<canvas
 						bind:this={ctrl.canvasEls[p.n - 1]}
 						class:invert-94={pagesInverted()}
@@ -322,7 +322,6 @@
 						</div>
 					{/if}
 				</div>
-				<div class="text-muted -mt-3 text-[10px]">{m.draft_page_label({ n: p.n })}</div>
 			{/each}
 		</div>
 	</ColorVisionFilter>
