@@ -189,6 +189,13 @@
 			: ''
 	);
 
+	// sent again with every status report, so a viewer still loading gets it
+	$effect(() => {
+		const on = pagesInverted();
+		void status;
+		frame?.contentWindow?.postMessage({ channel: CHANNEL, type: 'invert', value: on }, '*');
+	});
+
 	/** `dir` is +1 to zoom in, -1 out; the far side steps through tinymist's own zoom ladder. */
 	function stepZoom(dir: 1 | -1): void {
 		frame?.contentWindow?.postMessage({ channel: CHANNEL, type: 'zoom', value: dir }, '*');
@@ -307,8 +314,6 @@
 					src={frameUrl}
 					title={m.typst_preview_label()}
 					class="h-full border-0 transition-[filter] duration-100"
-					class:invert-94={pagesInverted()}
-					class:hue-rotate-180={pagesInverted()}
 					class:blur-[1.5px]={frozenWidth !== null}
 					class:pointer-events-none={frozenWidth !== null}
 					style:width={frozenWidth !== null ? `${frozenWidth}px` : '100%'}

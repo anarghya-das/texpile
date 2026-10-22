@@ -77,6 +77,10 @@ function injection(opts: PreparePageOptions): string {
 	#typst-container, #typst-container * {
 		cursor: default !important;
 	}
+	/* Invert colors, the PDF viewer's filter on the pages alone: the container paints the surround, which turned light */
+	html.texpile-inverted #typst-container svg:not(svg *) {
+		filter: invert(94%) hue-rotate(180deg);
+	}
 </style>
 <script id="texpile-bridge">
 (function () {
@@ -234,6 +238,7 @@ function injection(opts: PreparePageOptions): string {
 		else if (m.type === 'quiet') quietUntil = Date.now() + (typeof m.value === 'number' ? m.value : 500);
 		else if (m.type === 'freeze') jumpFreezeUntil = Date.now() + (typeof m.value === 'number' ? m.value : 1500);
 		else if (m.type === 'query') reply('status', status());
+		else if (m.type === 'invert') document.documentElement.classList.toggle('texpile-inverted', !!m.value);
 	});
 	// Report until the document is actually on screen, then stop. Reporting the whole status rather
 	// than just "ready" is what makes a stuck preview say WHY it is stuck.

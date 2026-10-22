@@ -53,6 +53,7 @@
 	let frameBox = $state<HTMLDivElement | null>(null);
 	let frame = $state<HTMLIFrameElement | null>(null);
 	let frameUrl = $state<string | null>(null);
+	let reports = $state(0);
 	let error = $state<string | null>(null);
 	let zoom = $state<number | null>(null);
 	/** frozen during splitter drags; see TypstPreview, same trade for the same reason */
@@ -169,8 +170,10 @@
 			if (!d || typeof d !== 'object') return;
 			if (d.channel === CHANNEL) {
 				if (d.type === 'zoom' && typeof d.value === 'number') zoom = d.value;
-				else if (d.type === 'status' && d.value && typeof d.value.zoom === 'number') zoom = d.value.zoom;
-				else if (d.type === 'error' && typeof d.value === 'string') error = d.value;
+				else if (d.type === 'status' && d.value) {
+					reports += 1;
+					if (typeof d.value.zoom === 'number') zoom = d.value.zoom;
+				} else if (d.type === 'error' && typeof d.value === 'string') error = d.value;
 				return;
 			}
 			if (d.channel !== NET) return;
@@ -237,6 +240,13 @@
 			collabGuest.onPreviewFrame = null;
 			drop(true); // leaving the pane must not leave the host holding a socket for nobody
 		};
+	});
+
+	// sent again with every status report, so a viewer still loading gets it
+	$effect(() => {
+		const on = pagesInverted();
+		void reports;
+		frame?.contentWindow?.postMessage({ channel: CHANNEL, type: 'invert', value: on }, '*');
 	});
 
 	/** `dir` is +1 to zoom in, -1 out; the far side steps through tinymist's own zoom ladder. */
@@ -321,8 +331,6 @@
 					src={frameUrl}
 					title={m.typst_preview_label()}
 					class="h-full border-0 transition-[filter] duration-100"
-					class:invert-94={pagesInverted()}
-					class:hue-rotate-180={pagesInverted()}
 					class:blur-[1.5px]={frozenWidth !== null}
 					class:pointer-events-none={frozenWidth !== null}
 					style:width={frozenWidth !== null ? `${frozenWidth}px` : '100%'}
