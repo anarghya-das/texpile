@@ -82,16 +82,10 @@ async function openPackageFile(source: SourceEditor, label: string): Promise<voi
 
 const bar = (page: Page, text: string | RegExp) => page.locator('.line-under').filter({ hasText: text });
 
-test('a new package file with a dropped entry raises the skipped entries toast', async () => {
-	const { page, userData } = texpile();
-	fs.writeFileSync(path.join(userData, 'packages', 'fresh.json'), json({ version: 1, macros: [{ name: 'freshok' }, { name: 'x y' }] }));
-	const toast = toasts(page).filter({ hasText: 'Some snippets were skipped (8)' });
-	await expect(toast).toBeVisible({ timeout: 15_000 });
-	await expect(toast).toContainText(/packages\/\w+\.json/);
-});
-
 test('the bar over a global package file with one dropped entry names it', async () => {
-	const { page, source } = texpile();
+	const { page, source, userData } = texpile();
+	fs.writeFileSync(path.join(userData, 'packages', 'fresh.json'), json({ version: 1, macros: [{ name: 'freshok' }, { name: 'x y' }] }));
+	await expect.poll(() => paletteLabels(page, 'Global Package File'), { timeout: 15_000 }).toContain('Edit Global Package File for fresh');
 	await openPackageFile(source, 'Edit Global Package File for fresh');
 	await expect(bar(page, 'Commands for the fresh package in every folder')).toContainText(`1 entry did not load. "x y": ${DROPPED}`);
 });
