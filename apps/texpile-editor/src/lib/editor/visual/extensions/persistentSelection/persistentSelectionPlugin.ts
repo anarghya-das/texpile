@@ -43,7 +43,7 @@ export function createPersistentSelectionPlugin() {
 			// after the event: removing the focused editor (Visual to Source) fires this in Svelte's teardown, where a
 			// dispatch updates the node views' state mid-render
 			function onFocusOut(e: FocusEvent) {
-				if (!e.relatedTarget && document.hasFocus()) queueMicrotask(() => view.isDestroyed || evaluate(null));
+				if (!e.relatedTarget && document.hasFocus()) queueMicrotask(() => view.isDestroyed || evaluate(document.activeElement));
 			}
 			function onWindowBlur() {
 				if (key.getState(view.state) === 'overlay') set('away');
