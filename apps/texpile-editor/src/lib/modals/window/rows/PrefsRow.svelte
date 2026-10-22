@@ -25,11 +25,11 @@
 </script>
 
 <div
-	class="rounded-base transition-colors duration-500 {props.frame === 'none'
+	class="transition-colors duration-500 {props.frame === 'none'
 		? ''
 		: 'border-surface-200-800 border-b py-4 last:border-b-0'} {props.layout === 'block'
 		? ''
-		: 'flex items-start justify-between gap-6'} {prefsFocus.row === props.id ? 'bg-primary-tint -mx-2 px-2' : ''}"
+		: 'flex items-start justify-between gap-6'} {prefsFocus.row === props.id ? 'bg-primary-tint rounded-base -mx-2 px-2' : ''}"
 	data-pref-row={props.id}
 	use:unavailableTip={props.why}
 >

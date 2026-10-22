@@ -11,6 +11,7 @@ import { EditorView } from '@codemirror/view';
 import type { Extension } from '@codemirror/state';
 import { filePathStore } from '$lib/stores/editorStore';
 import { JUNK_PATH, pathOption } from '$lib/editor/source/filePathCompletion';
+import { positionCompletionInfo } from '$lib/editor/source/tooltips/completionInfoPosition';
 
 // what a markdown preview can show
 const IMG_EXTS = ['png', 'jpg', 'jpeg', 'pdf', 'eps', 'gif', 'svg', 'webp', 'bmp'];
@@ -63,7 +64,12 @@ function reactivateOnDelete(): Extension {
 /** path completion for markdown links and images, plus snippets: the whole of md source-mode completion. */
 export function mdPathCompletion(): Extension {
 	return [
-		autocompletion({ override: [mdPathCompletionSource, snippetCompletionSource], activateOnTyping: true, icons: false }),
+		autocompletion({
+			override: [mdPathCompletionSource, snippetCompletionSource],
+			activateOnTyping: true,
+			icons: false,
+			positionInfo: positionCompletionInfo
+		}),
 		reactivateOnDelete()
 	];
 }

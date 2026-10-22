@@ -13,6 +13,7 @@ import { goToDefinition, type DefinitionHooks } from './definition';
 import { argumentHints } from './signature/argumentHints';
 import { latexRename } from './rename/renameCommand';
 import { tooltipCardTheme } from '$lib/editor/source/tooltips/tooltipCardTheme';
+import { positionCompletionInfo } from '$lib/editor/source/tooltips/completionInfoPosition';
 
 export { latexCompletionSource, bibFileCompletionSource };
 
@@ -52,7 +53,13 @@ export function latexAutocomplete(opts: IntellisenseOptions = {}): Extension {
 		// moves to the next field. First, to come before the snippet keymap at the same precedence
 		Prec.highest(keymap.of([{ key: 'Tab', run: acceptCompletion }])),
 		// accepted at once, as VS Code does: CodeMirror's 75 ms wait turned a quick Tab into a jump to the next field
-		autocompletion({ override: [source, snippetCompletionSource], activateOnTyping: true, icons: false, interactionDelay: 0 }),
+		autocompletion({
+			override: [source, snippetCompletionSource],
+			activateOnTyping: true,
+			icons: false,
+			interactionDelay: 0,
+			positionInfo: positionCompletionInfo
+		}),
 		reactivate(opts.bib ? BIB_CONTEXT : TEX_CONTEXT),
 		frecencyTracker()
 	];

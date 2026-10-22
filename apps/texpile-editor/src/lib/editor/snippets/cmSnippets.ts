@@ -20,6 +20,7 @@ import { contextAllows, snippetZoneAt } from './expand/snippetZone';
 import { onSnippetRegistry, snippetRegistry } from './file/snippetRegistry';
 import { mathKeys } from './math/mathKeys';
 import type { SnippetLanguage } from './file/snippetTypes';
+import { positionCompletionInfo } from '$lib/editor/source/tooltips/completionInfoPosition';
 
 const snippetLanguage = Facet.define<SnippetLanguage, SnippetLanguage | null>({ combine: (v) => v[0] ?? null });
 const undoStop = Facet.define<() => void, () => void>({ combine: (v) => v[0] ?? (() => {}) });
@@ -164,6 +165,11 @@ export function sourceSnippets(lang: SnippetLanguage, options: SourceSnippetOpti
 		keyedSnippets(lang),
 		openChoices,
 		// typst completion otherwise comes from tinymist alone
-		lang === 'typst' ? [autocompletion(), EditorState.languageData.of(() => [{ autocomplete: snippetCompletionSource }])] : []
+		lang === 'typst'
+			? [
+					autocompletion({ positionInfo: positionCompletionInfo }),
+					EditorState.languageData.of(() => [{ autocomplete: snippetCompletionSource }])
+				]
+			: []
 	];
 }

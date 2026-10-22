@@ -4,12 +4,13 @@
 	/** where a group is being drawn: on the bar, or as a row of the "..." menu */
 	export type PreviewToolbarPlace = 'bar' | 'menu';
 	/** one control group; `pinned` keeps it on the bar at every width, `inMenu` keeps it in the "..." at
-	 *  every width, `alignEnd` moves it
+	 *  every width, `foldsFirst` goes to the "..." before the rest wherever it stands, `alignEnd` moves it
 	 *  and what follows to the right edge of a left-laid bar (the editor column) */
 	export type PreviewToolbarGroup = {
 		id: string;
 		pinned?: boolean;
 		inMenu?: boolean;
+		foldsFirst?: boolean;
 		alignEnd?: boolean;
 		render: Snippet<[PreviewToolbarPlace]>;
 	};
@@ -53,12 +54,10 @@
 	} = $props();
 
 	// last group first, pinned ones never
-	const bar = new CollapsingToolbar(() =>
-		groups
-			.filter((g) => !g.pinned && !g.inMenu)
-			.map((g) => g.id)
-			.reverse()
-	);
+	const bar = new CollapsingToolbar(() => {
+		const folding = groups.filter((g) => !g.pinned && !g.inMenu);
+		return [...folding.filter((g) => g.foldsFirst), ...folding.filter((g) => !g.foldsFirst).reverse()].map((g) => g.id);
+	});
 	const hidden = $derived(new Set([...bar.hidden, ...groups.filter((g) => g.inMenu).map((g) => g.id)]));
 </script>
 

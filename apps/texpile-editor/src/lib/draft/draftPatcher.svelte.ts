@@ -280,7 +280,7 @@ export class DraftPatcher {
 				if (cal.bail === 'page-rtl' || cal.invisible) {
 					// page-rtl announces itself; an invisible paragraph (\eat, \footnotetext)
 					// reconciles in silence -- each keystroke's full pass would show nothing new
-					if (cal.bail === 'page-rtl') h.setStatus(m.draft_status_recompiling({ reason: whyPhrase(cal.bail) }));
+					if (cal.bail === 'page-rtl') h.setStatus(m.draft_status_not_instant({ reason: whyPhrase(cal.bail) }));
 					h.emit('abandon-debounced', { stage: cal.bail, key });
 					this.scheduleReconcile(req.onRecompile, true, cal.bail);
 					return;
@@ -446,7 +446,7 @@ export class DraftPatcher {
 				const whole = { page: a.page, ...a.patch.band };
 				showFocus(h, whole);
 				const ms = performance.now() - t0;
-				h.setStatus(m.draft_status_patched({ page: a.page, ms: ms.toFixed(0) }));
+				h.setStatus(m.draft_status_patched({ ms: ms.toFixed(0) }));
 				h.emit('patched-split', { hop: 1, page: a.page, spillPage: b.page });
 				// both pages are the engine's, but the break moved: the compile behind it brings the record
 				// store, the seams and every later page up to date, where two patches cannot
@@ -490,7 +490,7 @@ export class DraftPatcher {
 			showFocus(h, focus); // zoom+center on the edited line (Typst-style)
 			const ms = performance.now() - t0;
 			h.emit('patched', { page: cal.pageNo, moves: patchObj.moves.length, ms: +ms.toFixed(0) });
-			h.setStatus(m.draft_status_patched({ page: cal.pageNo, ms: ms.toFixed(0) }));
+			h.setStatus(m.draft_status_patched({ ms: ms.toFixed(0) }));
 			// An exact patch IS the engine's answer, so the pass that used to follow it only
 			// regenerated numbers already in hand: the page's new records come from the same
 			// pieces the painter drew, and the recompile has nothing left to discover.

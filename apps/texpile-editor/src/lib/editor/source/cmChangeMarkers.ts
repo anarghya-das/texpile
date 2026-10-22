@@ -255,8 +255,9 @@ function closePeek(view: EditorView): boolean {
 }
 
 const theme = EditorView.baseTheme({
-	'.cm-change-gutter .cm-gutterElement': { padding: '0 1px 0 3px' },
-	'.cm-change-mark': { width: '3px', height: '100%', cursor: 'pointer' },
+	'.cm-change-gutter': { width: '9px' },
+	'.cm-change-gutter .cm-gutterElement': { padding: '0 3px 0 2px' },
+	'.cm-change-mark': { width: '4px', height: '100%', cursor: 'pointer' },
 	'.cm-change-peek': {
 		margin: '2px 0 4px',
 		border: '1px solid color-mix(in srgb, currentColor 18%, transparent)',

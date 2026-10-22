@@ -104,6 +104,8 @@ export function buildSourceExtensions(deps: SourceSetupDeps): Extension[] {
 	const pasteDialect = pasteDialectOf(fileFor);
 	const snippetOptions = { stopUndoCapture: () => deps.undoManager?.stopCapturing() };
 	return [
+		// at the far left, where Zed puts them; nothing is drawn until the last saved version's text arrives
+		...(deps.readOnly ? [] : [cmChangeMarkers()]),
 		// gutters render in extension order: lint goes before lineNumbers so it lands on their left
 		// the hover first: hover cards share one box, which opens on the side the first one asks for
 		...(!fileFor || /\.(tex|typ)$/i.test(fileFor) ? [lintGutter({ hoverTime: 0 }), Prec.high(diagnosticHover())] : []),
@@ -122,9 +124,6 @@ export function buildSourceExtensions(deps: SourceSetupDeps): Extension[] {
 		// the comment mark rides these cells (gutterLineClass), so the click on it has to be
 		// handled by the gutter that owns them - EditorView.domEventHandlers only sees the text
 		lineNumbers(onSelectComment ? { domEventHandlers: commentGutterHandlers((id) => onSelectComment(id)) } : {}),
-		// between the numbers and the text, where VS Code puts them; nothing is drawn until the last
-		// saved version's text arrives
-		...(deps.readOnly ? [] : [cmChangeMarkers()]),
 		gutterTheme,
 		// middle dots, which the monospace fonts carry, each centered in its cell; a ⋯ falls back to a font set off center
 		codeFolding({ placeholderText: '···' }),

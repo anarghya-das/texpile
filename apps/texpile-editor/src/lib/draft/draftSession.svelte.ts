@@ -352,15 +352,11 @@ export class DraftSession {
 		// drop stale hashes for removed pages
 		for (const k of [...this.vp.prevRecords.keys()]) if (k > this.pages.length) this.vp.prevRecords.delete(k);
 		const secs = (r.ms / 1000).toFixed(1);
-		const pageCount =
-			this.pages.length === 1
-				? m.draft_compiled_pages_one({ count: this.pages.length })
-				: m.draft_compiled_pages_other({ count: this.pages.length });
 		const passesSuffix = (r.passes ?? 1) > 1 ? ` · ${m.draft_compiled_passes({ passes: r.passes })}` : '';
 		// an abandon-triggered pass closes its own loop: the status that said "Recompiling
 		// (heading)..." lands as "Recompiled (heading) in 0.7 s", not a generic compile line
 		const why = this.compiler.lastReason.startsWith('abandon:') ? whyPhrase(this.compiler.lastReason.slice(8)) : null;
-		this.compiler.status = `${why ? m.draft_status_recompiled({ reason: why, secs }) : m.draft_status_compiled({ secs })} · ${pageCount}${passesSuffix}`;
+		this.compiler.status = `${why ? m.draft_status_recompiled({ reason: why, secs }) : m.draft_status_compiled({ secs })}${passesSuffix}`;
 		this.ev('compiled', { pages: this.pages.length, passes: r.passes ?? 1, changed, ms: r.ms });
 		const f = this.patcher.takeFocus();
 		if (f) {

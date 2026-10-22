@@ -16,6 +16,7 @@
 	import { savePdfBytes } from '$lib/workspace/fileSystem';
 	import { resolvedMode } from '$lib/theme';
 	import { layout, updateLayout } from '$lib/storage/layout';
+	import { pagesInverted } from './invertColors/pagesInverted';
 	import { untrack, type Snippet } from 'svelte';
 	import { editorGroups } from '$lib/workspace/groups/editorGroups.svelte';
 
@@ -42,7 +43,7 @@
 	// the preview splits; a .pdf opened as a tab is a file like any other
 	const splittable = $derived(placement !== 'file');
 	const dark = $derived(resolvedMode.current === 'dark');
-	const inverted = $derived(dark ? layout.current.pdfDarkPages : layout.current.pdfDarkPagesInLight);
+	const inverted = $derived(pagesInverted());
 
 	let actions: PdfViewerActions | null = null;
 	/** SyncTeX forward search: scroll to and flash a box. (x, y) is the box origin in PDF points, top-left, y down. */
@@ -179,8 +180,7 @@
 			documentMenu={place === 0}
 			findOpen={finds[place]}
 			onToggleFind={() => (finds[place] = !finds[place])}
-			{inverted}
-			onToggleInvert={() => updateLayout(dark ? { pdfDarkPages: !inverted } : { pdfDarkPagesInLight: !inverted })}
+			invertable
 		/>
 	</PdfViewScope>
 {/snippet}

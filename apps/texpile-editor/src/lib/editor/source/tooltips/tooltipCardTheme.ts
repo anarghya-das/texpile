@@ -77,5 +77,7 @@ export const tooltipCardTheme = EditorView.theme({
 		opacity: '0.6'
 	},
 	'.cm-completionMatchedText': { color: 'var(--primary-ink)', textDecoration: 'none', fontWeight: '600' },
-	'.cm-tooltip.cm-completionInfo': { padding: PAD, maxWidth: '280px' }
+	'.cm-tooltip.cm-completionInfo': { padding: PAD, maxWidth: '280px' },
+	'.cm-tooltip.cm-completionInfo.cm-completionInfo-right': { marginLeft: 'calc(var(--spacing) * 1)' },
+	'.cm-tooltip.cm-completionInfo.cm-completionInfo-left': { marginRight: 'calc(var(--spacing) * 1)' }
 });

@@ -15,6 +15,8 @@
 	import PreviewToolbar, { type PreviewToolbarPlace } from '$lib/preview/PreviewToolbar.svelte';
 	import ColorVisionMenu from '$lib/preview/colorVision/ColorVisionMenu.svelte';
 	import ColorVisionFilter from '$lib/preview/colorVision/ColorVisionFilter.svelte';
+	import InvertColorsItem from '$lib/preview/invertColors/InvertColorsItem.svelte';
+	import { pagesInverted } from '$lib/preview/invertColors/pagesInverted';
 	import { resolvedMode, themeEpoch } from '$lib/theme';
 	import { settings, updateSettings } from '$lib/settings';
 	import { followScrollTick, guestJumpFreezeTick } from './followSignal';
@@ -267,6 +269,9 @@
 			{#if place === 'menu'}{m.typst_export_toolbar()}{/if}
 		</button>
 	{/snippet}
+	{#snippet invert(place: PreviewToolbarPlace)}
+		<InvertColorsItem {place} />
+	{/snippet}
 	{#snippet vision(place: PreviewToolbarPlace)}
 		<ColorVisionMenu {place} />
 	{/snippet}
@@ -283,9 +288,10 @@
 		trailing={onPopout ? popout : undefined}
 		{asTabStrip}
 		groups={[
+			...(controls ? [{ id: 'status', pinned: !!error || !!stall, foldsFirst: true, render: status }] : []),
 			{ id: 'zoom', render: zoomGroup },
 			{ id: 'follow', render: follow },
-			...(controls ? [{ id: 'status', pinned: !!error || !!stall, render: status }] : []),
+			{ id: 'invert', inMenu: true, render: invert },
 			{ id: 'vision', inMenu: true, render: vision },
 			{ id: 'export', inMenu: true, render: exportPdf }
 		]}
@@ -301,6 +307,8 @@
 					src={frameUrl}
 					title={m.typst_preview_label()}
 					class="h-full border-0 transition-[filter] duration-100"
+					class:invert-94={pagesInverted()}
+					class:hue-rotate-180={pagesInverted()}
 					class:blur-[1.5px]={frozenWidth !== null}
 					class:pointer-events-none={frozenWidth !== null}
 					style:width={frozenWidth !== null ? `${frozenWidth}px` : '100%'}

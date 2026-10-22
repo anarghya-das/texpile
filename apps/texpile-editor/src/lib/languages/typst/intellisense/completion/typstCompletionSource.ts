@@ -9,6 +9,7 @@ import {
 import { EditorState, type ChangeDesc, type Extension, type Text } from '@codemirror/state';
 import type { EditorView } from '@codemirror/view';
 import { LSPPlugin } from '@codemirror/lsp-client';
+import { positionCompletionInfo } from '$lib/editor/source/tooltips/completionInfoPosition';
 
 type LspPosition = { line: number; character: number };
 type LspRange = { start: LspPosition; end: LspPosition };
@@ -166,5 +167,8 @@ export async function typstCompletionSource(context: CompletionContext): Promise
 
 /** the completion extension for an editor bound to a tinymist client */
 export function typstCompletion(): Extension {
-	return [autocompletion(), EditorState.languageData.of(() => [{ autocomplete: typstCompletionSource }])];
+	return [
+		autocompletion({ positionInfo: positionCompletionInfo }),
+		EditorState.languageData.of(() => [{ autocomplete: typstCompletionSource }])
+	];
 }

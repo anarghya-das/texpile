@@ -1,10 +1,11 @@
 <script lang="ts">
 	import { tip } from '$lib/components/tooltip.svelte';
-	import { ZoomIn, ZoomOut, RotateCw, Search, ChevronUp, ChevronDown, Save, Presentation, Contrast, Check } from '@lucide/svelte';
+	import { ZoomIn, ZoomOut, RotateCw, Search, ChevronUp, ChevronDown, Save, Presentation } from '@lucide/svelte';
 	import { getPdfViewerContext } from './pdf-viewer/context';
 	import PdfZoomMenu from './PdfZoomMenu.svelte';
 	import PreviewToolbar, { type PreviewToolbarPlace } from '$lib/preview/PreviewToolbar.svelte';
 	import ColorVisionMenu from '$lib/preview/colorVision/ColorVisionMenu.svelte';
+	import InvertColorsItem from '$lib/preview/invertColors/InvertColorsItem.svelte';
 
 	import type { Snippet } from 'svelte';
 
@@ -22,8 +23,7 @@
 		inPopout = false,
 		findOpen = false,
 		onToggleFind,
-		inverted = false,
-		onToggleInvert,
+		invertable = false,
 		documentMenu = true
 	}: {
 		leading?: Snippet;
@@ -36,9 +36,8 @@
 		/** the find bar (PdfSearchBar) is the viewer's; the bar only carries its switch */
 		findOpen?: boolean;
 		onToggleFind?: () => void;
-		/** the pages are drawn with their colors inverted; each theme keeps its own choice */
-		inverted?: boolean;
-		onToggleInvert?: () => void;
+		/** offers Invert colors */
+		invertable?: boolean;
 		/** the "..." with what applies to the whole document; a split's lower bar leaves it to the top one */
 		documentMenu?: boolean;
 	} = $props();
@@ -98,16 +97,7 @@
 <!-- how the pages' colors are drawn, inverted and as a color-blind reader sees them; in the "..." with those below,
      one row each -->
 {#snippet invert(place: PreviewToolbarPlace)}
-	<button
-		class:menu-item={place === 'menu'}
-		aria-pressed={inverted}
-		onclick={onToggleInvert}
-		aria-label="Invert page colors"
-		use:tip={'Invert page colors'}
-	>
-		<Contrast size={16} />
-		{#if place === 'menu'}Invert colors{#if inverted}<Check size={14} class="ml-auto" />{/if}{/if}
-	</button>
+	<InvertColorsItem {place} />
 {/snippet}
 
 {#snippet vision(place: PreviewToolbarPlace)}
@@ -171,7 +161,7 @@
 		...(documentMenu
 			? [
 					{ id: 'rotate', inMenu: true, render: rotate },
-					...(onToggleInvert ? [{ id: 'invert', inMenu: true, render: invert }] : []),
+					...(invertable ? [{ id: 'invert', inMenu: true, render: invert }] : []),
 					{ id: 'vision', inMenu: true, render: vision },
 					{ id: 'present', inMenu: true, render: present },
 					...(ctx.state.canSavePdf ? [{ id: 'save', inMenu: true, render: save }] : [])

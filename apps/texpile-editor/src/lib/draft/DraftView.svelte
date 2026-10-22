@@ -14,6 +14,8 @@
 	import PreviewToolbar, { type PreviewToolbarPlace } from '$lib/preview/PreviewToolbar.svelte';
 	import ColorVisionMenu from '$lib/preview/colorVision/ColorVisionMenu.svelte';
 	import ColorVisionFilter from '$lib/preview/colorVision/ColorVisionFilter.svelte';
+	import InvertColorsItem from '$lib/preview/invertColors/InvertColorsItem.svelte';
+	import { pagesInverted } from '$lib/preview/invertColors/pagesInverted';
 	import { wheelZoomFactor } from '$lib/preview/zoom/wheelZoom';
 	import ProgressLine from '$lib/components/progress/ProgressLine.svelte';
 	import { DraftSession } from './draftSession.svelte';
@@ -226,6 +228,9 @@
 			{#if place === 'menu'}{m.draft_toolbar_save_pdf()}{/if}
 		</button>
 	{/snippet}
+	{#snippet invert(place: PreviewToolbarPlace)}
+		<InvertColorsItem {place} />
+	{/snippet}
 	{#snippet vision(place: PreviewToolbarPlace)}
 		<ColorVisionMenu {place} />
 	{/snippet}
@@ -241,10 +246,11 @@
 		trailing={onPopout ? popout : undefined}
 		{asTabStrip}
 		groups={[
+			...(controls ? [{ id: 'status', pinned: !!compiler.error, foldsFirst: true, render: status }] : []),
 			...(ctrl.pages.length ? [{ id: 'pages', render: pages }] : []),
 			{ id: 'zoom', render: zoom },
 			{ id: 'follow', render: follow },
-			...(controls ? [{ id: 'status', pinned: !!compiler.error, render: status }] : []),
+			{ id: 'invert', inMenu: true, render: invert },
 			{ id: 'vision', inMenu: true, render: vision },
 			{ id: 'save', inMenu: true, render: save }
 		]}
@@ -286,7 +292,12 @@
 		>
 			{#each ctrl.pages as p (p.n)}
 				<div class="relative shadow-lg">
-					<canvas bind:this={ctrl.canvasEls[p.n - 1]} ondblclick={(e) => ctrl.onCanvasDblClick(p.n, e)}></canvas>
+					<canvas
+						bind:this={ctrl.canvasEls[p.n - 1]}
+						class:invert-94={pagesInverted()}
+						class:hue-rotate-180={pagesInverted()}
+						ondblclick={(e) => ctrl.onCanvasDblClick(p.n, e)}
+					></canvas>
 					{#if vp.editBand && vp.editBand.page === p.n}
 						<!-- the located band of the paragraph being edited; fades shortly after typing stops -->
 						<div
