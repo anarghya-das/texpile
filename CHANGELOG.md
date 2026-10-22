@@ -5,6 +5,13 @@ Release notes for Texpile Desktop. Add notes under `## [Unreleased]` as you work
 
 ## [Unreleased]
 
+## [1.6.1] - 2026-10-22
+
+- feat: invert page colors for live mode (by @louisqli)
+- feat: absolute theme (by @louisqli)
+- fix: intellisense false positive in beamer use theme (by @louisqli)
+- fix: minor UI inconsistency (by @louisqli)
+
 ## [1.6.0] - 2026-10-21
 
 - feat: IntelliSense for most CTAN packages and classes (by @louisqli)
