@@ -83,13 +83,14 @@ type LoaderUse = { name: string; role: 'package' | 'class'; options: string; nam
 
 // the options sit in the [..] before the name
 function loaderUsesIn(code: string): LoaderUse[] {
-	return fileCallsIn(code, ['package', 'class']).flatMap((call) =>
+	return fileCallsIn(code, ['package', 'class', 'library']).flatMap((call) =>
 		call.args
 			.filter((a) => a.arg.loads)
 			.flatMap((a) => {
 				const role = rolesOf(a.arg).includes('class') ? 'class' : 'package';
 				const options = /\[([^\]]*)\]/.exec(code.slice(call.at + call.command.length + 1, a.values[0]?.at ?? call.at))?.[1] ?? '';
-				return a.values.map((v) => ({ name: v.value, role, options: options.trim(), names: namesTried(a.arg, v.value) }));
+				const prefix = a.arg.library ?? '';
+				return a.values.map((v) => ({ name: prefix + v.value, role, options: options.trim(), names: namesTried(a.arg, prefix + v.value) }));
 			})
 	);
 }

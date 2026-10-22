@@ -13,6 +13,14 @@ describe('packageUsesIn', () => {
 		]);
 	});
 
+	it('reads a beamer theme as its file in the folder', () => {
+		expect(packageUsesIn('\\documentclass{beamer}\n\\usetheme{Illinois}')).toContainEqual({
+			name: 'beamerthemeIllinois',
+			options: [],
+			file: 'beamerthemeIllinois.sty'
+		});
+	});
+
 	it('keeps a language selector in the order of the source', () => {
 		const uses = packageUsesIn('\\usepackage{polyglossia}\n\\setmainlanguage{german}\n\\usepackage{amsmath}');
 		expect(uses.map((u) => u.name)).toEqual(['polyglossia', 'polyglossia', 'amsmath']);

@@ -40,7 +40,7 @@ function usesOf(text: string, call: CommandCall): PackageUseSite[] {
 			name: prefix + name,
 			options,
 			at,
-			...(arg.ext ? { file: namesTried(arg, name)[0] } : {})
+			...(arg.ext ? { file: namesTried(arg, (arg.library ?? '') + name)[0] } : {})
 		}));
 	});
 }
