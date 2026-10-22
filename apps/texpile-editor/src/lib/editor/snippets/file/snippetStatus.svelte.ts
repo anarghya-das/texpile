@@ -48,7 +48,7 @@ onSnippetRegistry(() => {
 	// the file open in the editor has its own bar saying what failed, and changes on every autosave
 	const open = activeFilePath.current ? snippetFileAt(activeFilePath.current, workspaceRoot.current, files) : null;
 	// a warning is for when the file is open: its snippet still works
-	const told = problems.filter((p) => !p.warning && !(open && problemsIn(open, [p]).length));
+	const told = problems.filter((p) => !p.warning && !p.file && !(open && problemsIn(open, [p]).length));
 	const key = told.map(describeSnippetProblem).join('\n');
 	if (key && key !== shown)
 		toaster.warning({ title: m.snippets_problems_title({ count: told.length }), description: describeSnippetProblem(told[0]) });
