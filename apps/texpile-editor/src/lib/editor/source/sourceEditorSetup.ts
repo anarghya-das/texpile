@@ -104,7 +104,6 @@ export function buildSourceExtensions(deps: SourceSetupDeps): Extension[] {
 	const pasteDialect = pasteDialectOf(fileFor);
 	const snippetOptions = { stopUndoCapture: () => deps.undoManager?.stopCapturing() };
 	return [
-		// at the far left, where Zed puts them; nothing is drawn until the last saved version's text arrives
 		...(deps.readOnly ? [] : [cmChangeMarkers()]),
 		// gutters render in extension order: lint goes before lineNumbers so it lands on their left
 		// the hover first: hover cards share one box, which opens on the side the first one asks for

@@ -77,7 +77,23 @@ function injection(opts: PreparePageOptions): string {
 	#typst-container, #typst-container * {
 		cursor: default !important;
 	}
-	/* Invert colors, the PDF viewer's filter on the pages alone: the container paints the surround, which turned light */
+	::-webkit-scrollbar {
+		width: 10px;
+		height: 10px;
+	}
+	::-webkit-scrollbar-track,
+	::-webkit-scrollbar-corner {
+		background: transparent;
+	}
+	::-webkit-scrollbar-thumb {
+		background-color: color-mix(in oklab, ${opts.foreground} 30%, transparent);
+		border-radius: 5px;
+		border: 2px solid transparent;
+		background-clip: padding-box;
+	}
+	::-webkit-scrollbar-thumb:hover {
+		background-color: color-mix(in oklab, ${opts.foreground} 45%, transparent);
+	}
 	html.texpile-inverted #typst-container svg:not(svg *) {
 		filter: invert(94%) hue-rotate(180deg);
 	}

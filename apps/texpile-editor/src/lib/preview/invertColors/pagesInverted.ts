@@ -1,4 +1,3 @@
-// one Invert colors choice for the PDF and the live previews, kept per theme
 import { resolvedMode } from '$lib/theme';
 import { layout, updateLayout } from '$lib/storage/layout';
 

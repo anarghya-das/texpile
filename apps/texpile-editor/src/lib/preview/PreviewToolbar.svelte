@@ -4,7 +4,7 @@
 	/** where a group is being drawn: on the bar, or as a row of the "..." menu */
 	export type PreviewToolbarPlace = 'bar' | 'menu';
 	/** one control group; `pinned` keeps it on the bar at every width, `inMenu` keeps it in the "..." at
-	 *  every width, `foldsFirst` goes to the "..." before the rest wherever it stands, `alignEnd` moves it
+	 *  every width, `alignEnd` moves it
 	 *  and what follows to the right edge of a left-laid bar (the editor column) */
 	export type PreviewToolbarGroup = {
 		id: string;

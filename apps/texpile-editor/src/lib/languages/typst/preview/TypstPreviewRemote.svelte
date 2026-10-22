@@ -242,7 +242,6 @@
 		};
 	});
 
-	// sent again with every status report, so a viewer still loading gets it
 	$effect(() => {
 		const on = pagesInverted();
 		void reports;

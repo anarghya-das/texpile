@@ -1,6 +1,5 @@
-// Copies Skeleton's preset themes into public/themes/, writes Absolute from the default theme, and writes
-// themes/index.json: each theme's name, label and the five colours a picker tile needs (its primary, both grounds,
-// both panels).
+// Copies Skeleton's preset themes into public/themes/ and writes themes/index.json: each theme's
+// name, label and the five colours a picker tile needs (its primary, both grounds, both panels).
 // Runs from `pnpm sync`, so the files track the installed Skeleton version instead of living in git.
 import { mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -14,7 +13,6 @@ mkdirSync(out, { recursive: true });
 // file names are lower-case single words; the two that are really two words get their spelling back
 const LABELS = { rosepine: 'Rosé Pine', hamlindigo: 'Hamlindigo' };
 
-// the app's rows, menus and inputs are drawn for small corners; Rosé Pine's pill radius bent their rules
 const MOST_REM = { '--radius-base': 0.5, '--radius-container': 0.75 };
 function cappedCorners(css) {
 	return css.replace(/(--radius-(?:base|container)):\s*([\d.]+)rem;/g, (all, name, rem) =>
@@ -22,7 +20,6 @@ function cappedCorners(css) {
 	);
 }
 
-// the default theme on neutral grays that end in pure white and pure black
 const ABSOLUTE_LIGHTNESS = { 50: 100, 100: 96.5, 200: 92, 300: 86, 400: 72, 500: 58, 600: 46, 700: 33, 800: 24, 900: 15, 950: 0 };
 function absoluteFrom(css) {
 	let out = css.replace("[data-theme='theme']", "[data-theme='absolute']");

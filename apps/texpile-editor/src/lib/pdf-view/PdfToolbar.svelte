@@ -36,7 +36,6 @@
 		/** the find bar (PdfSearchBar) is the viewer's; the bar only carries its switch */
 		findOpen?: boolean;
 		onToggleFind?: () => void;
-		/** offers Invert colors */
 		invertable?: boolean;
 		/** the "..." with what applies to the whole document; a split's lower bar leaves it to the top one */
 		documentMenu?: boolean;

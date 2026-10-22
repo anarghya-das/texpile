@@ -1,4 +1,3 @@
-// a completion's note beside the list, else past the caret's line as Zed places it; CodeMirror's own laid it over the list
 import { Direction, type EditorView as CMView, type Rect } from '@codemirror/view';
 
 const WIDTH = 400;
