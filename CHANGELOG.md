@@ -5,6 +5,11 @@ Release notes for Texpile Desktop. Add notes under `## [Unreleased]` as you work
 
 ## [Unreleased]
 
+## [1.6.2] - 2026-10-24
+
+- fix: LaTeX error log not parsing (by @louisqli)
+- fix: glibc version issue on Linux (by @louisqli)
+
 ## [1.6.1] - 2026-10-22
 
 - feat: invert page colors for live mode (by @louisqli)
