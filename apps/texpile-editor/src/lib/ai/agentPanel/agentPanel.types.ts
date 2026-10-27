@@ -12,6 +12,18 @@ export type ToolStatus = 'pending' | 'in_progress' | 'completed' | 'failed';
 export type ToolItem = { kind: 'tool'; id: string; title: string; toolKind: ToolKind; status: ToolStatus; paths: string[] };
 export type PlanEntry = { content: string; status: 'pending' | 'in_progress' | 'completed' };
 
+export type CompactionStatus = 'in_progress' | 'completed' | 'failed' | 'cancelled';
+/** where the agent summed up the conversation so far to free its context; `compactionId` is the agent's own */
+export type CompactionItem = {
+	kind: 'compaction';
+	id: string;
+	compactionId: string;
+	status: CompactionStatus;
+	summary: string;
+	/** why it failed, in the agent's words */
+	error: string | null;
+};
+
 export type ChangedFile = {
 	/** absolute */
 	path: string;
@@ -33,10 +45,14 @@ export type ChatItem =
 	| { kind: 'thought'; id: string; text: string }
 	| ToolItem
 	| { kind: 'plan'; id: string; entries: PlanEntry[] }
+	| CompactionItem
 	| { kind: 'changes'; id: string; files: ChangedFile[] }
 	| { kind: 'error'; id: string; text: string };
 
 export type PermissionAsk = { id: string; title: string; options: { optionId: string; name: string; kind: string }[] };
+
+/** how much of the model's context window the chat fills, in tokens, as the agent last counted it */
+export type ContextUsage = { used: number; size: number };
 
 /** a slash command the agent offers; `hint` names what to type after it, when it takes anything */
 export type AgentCommand = { name: string; description: string; hint: string | null };
