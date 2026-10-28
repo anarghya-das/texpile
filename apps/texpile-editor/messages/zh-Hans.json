@@ -2313,6 +2313,8 @@
 	"agent_panel_send": "发送",
 	"agent_panel_stop": "停止",
 	"agent_panel_context": "已使用 {percent} 的上下文（{used} / {size} 个 token）",
+	"agent_panel_context_title": "上下文",
+	"agent_panel_context_tokens": "{used} / {size} 个 token",
 	"agent_panel_compacting": "正在压缩对话",
 	"agent_panel_compacted": "上下文已压缩",
 	"agent_panel_compaction_failed": "无法压缩上下文",
