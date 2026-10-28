@@ -1,6 +1,4 @@
 <script lang="ts">
-	// Where the agent summed up the conversation so far to free its context: from here on it has only that summary of
-	// what came before. A divider across the conversation, the summary folded under it and the reason under one that failed
 	import { ChevronDown, ChevronRight, LoaderCircle, X } from '@lucide/svelte';
 	import { m } from '$lib/paraglide/messages';
 	import type { CompactionItem } from '../../agentPanel.types';

@@ -88,8 +88,6 @@ function compactionAt(items: ChatItem[], id: unknown): number {
 	return typeof id === 'string' ? items.findIndex((i) => i.kind === 'compaction' && i.compactionId === id) : -1;
 }
 
-/** the first update places the compaction, later ones patch it: a summary or error left out stays as it was, null
- *  clears it */
 function upsertCompaction(items: ChatItem[], u: SessionUpdate): ChatItem[] {
 	if (typeof u.compactionId !== 'string') return items;
 	const at = compactionAt(items, u.compactionId);
@@ -106,7 +104,6 @@ function upsertCompaction(items: ChatItem[], u: SessionUpdate): ChatItem[] {
 	return at < 0 ? [...items, next] : items.map((i, n) => (n === at ? next : i));
 }
 
-/** the summary as it streams in, after the compaction's first update */
 function appendSummary(items: ChatItem[], u: SessionUpdate): ChatItem[] {
 	const at = compactionAt(items, u.compactionId);
 	const chunk = text(u.content);
@@ -164,7 +161,6 @@ export function availableCommands(raw: unknown): AgentCommand[] {
 		}));
 }
 
-/** the context a usage_update reports; null for one with no window to measure against */
 export function contextUsage(u: SessionUpdate): ContextUsage | null {
 	const { used, size } = u;
 	if (typeof used !== 'number' || typeof size !== 'number' || !Number.isFinite(used) || !Number.isFinite(size) || size <= 0) return null;

@@ -51,7 +51,6 @@ export class AgentSession {
 	chats = $state<ChatInfo[]>([]);
 	/** the chat open now, as the agent names it */
 	chat = $state<string | null>(null);
-	/** how full the chat's context is; null until the agent first says, and for an agent that never does */
 	usage = $state<ContextUsage | null>(null);
 	private unsubscribe: (() => void) | null = null;
 	/** bumped by each start and close, so what a turn of an earlier conversation brings back goes nowhere */

@@ -107,8 +107,6 @@ export class AcpSession {
 		try {
 			const init = await this.connection.agent.request(acp.methods.agent.initialize, {
 				protocolVersion: acp.PROTOCOL_VERSION,
-				// compaction as its own update, which the panel draws as a divider with the summary under it, rather than
-				// as a made-up tool call
 				clientCapabilities: { session: { compaction: {} } },
 				clientInfo: { name: 'texpile', title: 'Texpile', version: this.o.version }
 			});

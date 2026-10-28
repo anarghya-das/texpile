@@ -28,8 +28,7 @@ async function fsCall(channel: string, body: unknown): Promise<void> {
 	expect(await h.handlers.get(channel)!({}, body)).toMatchObject({ ok: true });
 }
 
-// an ACP agent over JSON lines: asks before it edits main.tex (and deletes old.tex) in its folder, or wants a sign-in first.
-// It keeps what Texpile said it can take, in <name>.initialize.json
+// an ACP agent over JSON lines: asks before it edits main.tex (and deletes old.tex) in its folder, or wants a sign-in first
 function fakeAgent(name: string, wantsSignIn: boolean): string {
 	const file = path.join(dir, name);
 	fs.writeFileSync(

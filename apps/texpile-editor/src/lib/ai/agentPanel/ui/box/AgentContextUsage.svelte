@@ -1,27 +1,35 @@
 <script lang="ts">
-	// How full the chat's context is: a ring beside Send that fills as the chat grows, and turns to a warning once
-	// the agent is close to dropping or summing up the oldest of it. The counts are in its hint
 	import { Progress } from '@skeletonlabs/skeleton-svelte';
+	import { showContextMenu } from '$lib/menus/contextMenu.svelte';
 	import { tip } from '$lib/components/tooltip.svelte';
-	import { contextShare, contextUsageLabel, isContextNearlyFull } from './contextUsageMeter';
-	import type { ContextUsage } from '../../agentPanel.types';
+	import { contextShare, contextUsageLabel, contextUsageMenu, isContextNearlyFull } from './contextUsageMeter';
+	import type { AgentCommand, ContextUsage } from '../../agentPanel.types';
 
-	type Props = { usage: ContextUsage };
+	type Props = { usage: ContextUsage; commands: AgentCommand[]; working: boolean; agent: string; onCompact: () => void };
 	const props: Props = $props();
 	const label = $derived(contextUsageLabel(props.usage));
+	const colour = $derived(isContextNearlyFull(props.usage) ? 'text-warning-ink' : 'text-muted');
+
+	function openMenu(button: HTMLElement): void {
+		const at = button.getBoundingClientRect();
+		void showContextMenu(
+			contextUsageMenu(props.usage, props.commands, props.working, props.agent, props.onCompact),
+			{ x: at.left, y: at.top - 4 },
+			{ above: true }
+		);
+	}
 </script>
 
-<Progress value={contextShare(props.usage) * 100}>
-	{#snippet element(attrs)}
-		<div
-			{...attrs}
-			class="flex size-6 shrink-0 items-center justify-center {isContextNearlyFull(props.usage) ? 'text-warning-ink' : 'text-muted'}"
-			use:tip={label}
-		>
-			<Progress.Circle class="[--size:calc(var(--spacing)*3.5)] [--thickness:calc(var(--spacing)*0.5)]" aria-label={label}>
-				<Progress.CircleTrack />
-				<Progress.CircleRange class="stroke-current" />
-			</Progress.Circle>
-		</div>
-	{/snippet}
-</Progress>
+<button
+	class="{colour} hover:bg-surface-200-800 rounded-base flex size-6 shrink-0 items-center justify-center transition-colors"
+	aria-label={label}
+	use:tip={label}
+	onclick={(e) => openMenu(e.currentTarget)}
+>
+	<Progress value={contextShare(props.usage) * 100}>
+		<Progress.Circle class="[--size:calc(var(--spacing)*3.5)] [--thickness:calc(var(--spacing)*0.5)]">
+			<Progress.CircleTrack />
+			<Progress.CircleRange class="stroke-current" />
+		</Progress.Circle>
+	</Progress>
+</button>

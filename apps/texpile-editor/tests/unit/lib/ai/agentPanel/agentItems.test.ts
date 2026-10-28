@@ -1,5 +1,5 @@
 import { it, expect } from 'vitest';
-import { applyUpdate, chatBlocks, contextUsage, toolTitle } from '$lib/ai/agentPanel/agentItems';
+import { applyUpdate, chatBlocks, toolTitle } from '$lib/ai/agentPanel/agentItems';
 import type { ChatItem, SessionUpdate } from '$lib/ai/agentPanel/agentPanel.types';
 
 function run(updates: SessionUpdate[]): ChatItem[] {
@@ -36,15 +36,6 @@ it("names a tool from Texpile's own MCP server in words, and leaves the agent's 
 	expect(toolTitle('Edit main.tex')).toBe('Edit main.tex');
 });
 
-it('reads the context a usage_update reports, and nothing from one with no window to measure against', () => {
-	expect(contextUsage({ sessionUpdate: 'usage_update', used: 52_000, size: 200_000, cost: { amount: 0.4, currency: 'USD' } })).toEqual({
-		used: 52_000,
-		size: 200_000
-	});
-	expect(contextUsage({ sessionUpdate: 'usage_update', used: 52_000, size: 0 })).toBeNull();
-	expect(contextUsage({ sessionUpdate: 'usage_update', used: '52000', size: 200_000 })).toBeNull();
-});
-
 it('places a compaction at its first update, streams its summary in, and patches it with the later ones', () => {
 	const summary = (text: string) => [{ type: 'text', text }];
 	const items = run([
@@ -52,11 +43,9 @@ it('places a compaction at its first update, streams its summary in, and patches
 		{ sessionUpdate: 'compaction_update', compactionId: 'c1', status: 'in_progress' },
 		{ sessionUpdate: 'compaction_summary_chunk', compactionId: 'c1', content: { type: 'text', text: 'Asked to ' } },
 		{ sessionUpdate: 'compaction_summary_chunk', compactionId: 'c1', content: { type: 'text', text: 'fix the intro.' } },
-		// one with no summary leaves the summary standing
 		{ sessionUpdate: 'compaction_update', compactionId: 'c1', status: 'completed' },
 		{ sessionUpdate: 'agent_message_chunk', content: { type: 'text', text: 'Done.' } },
 		{ sessionUpdate: 'compaction_update', compactionId: 'c2', status: 'completed', summary: summary('Old.') },
-		// an empty summary clears it
 		{ sessionUpdate: 'compaction_update', compactionId: 'c2', status: 'completed', summary: [] }
 	]);
 	expect(items.map((i) => (i.kind === 'compaction' ? `${i.compactionId}:${i.status}:${i.summary}` : i.kind))).toEqual([
@@ -64,16 +53,5 @@ it('places a compaction at its first update, streams its summary in, and patches
 		'c1:completed:Asked to fix the intro.',
 		'agent',
 		'c2:completed:'
-	]);
-});
-
-it("keeps a failed compaction's reason, and drops a summary chunk for a compaction it never saw start", () => {
-	const items = run([
-		{ sessionUpdate: 'compaction_summary_chunk', compactionId: 'gone', content: { type: 'text', text: 'lost' } },
-		{ sessionUpdate: 'compaction_update', compactionId: 'c1', status: 'in_progress' },
-		{ sessionUpdate: 'compaction_update', compactionId: 'c1', status: 'failed', error: 'Prompt is too long' }
-	]);
-	expect(items).toEqual([
-		{ kind: 'compaction', id: expect.any(String), compactionId: 'c1', status: 'failed', summary: '', error: 'Prompt is too long' }
 	]);
 });

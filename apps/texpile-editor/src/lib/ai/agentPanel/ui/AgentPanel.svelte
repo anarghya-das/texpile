@@ -30,8 +30,7 @@
 	const blocks = $derived(chatBlocks(agentSession.items));
 	const labels = $derived(pathLabels(root ?? ''));
 	const live = $derived(agentSession.state === 'ready' || agentSession.state === 'working');
-	// that the turn is still going, where nothing else says so: a question waiting, or a step or a compaction still
-	// running, says it already
+	// that the turn is still going, where nothing else says so: a question waiting, or a step still running, says it already
 	const last = $derived(agentSession.items.at(-1));
 	const quiet = $derived(
 		agentSession.state === 'working' &&

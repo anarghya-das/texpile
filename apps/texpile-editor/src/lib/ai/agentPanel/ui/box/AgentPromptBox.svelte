@@ -1,7 +1,7 @@
 <script lang="ts">
 	// Where the reader writes to the agent. The open file, or the lines selected in it, goes with each message unless
 	// taken off, and so do images pasted, dropped or picked from the +; the agent's own settings (its permission mode,
-	// its model) sit beside the + as it offers them, and how full the chat's context is beside Send
+	// its model) sit beside the + as it offers them
 	import { ArrowUp, ChevronDown, Square } from '@lucide/svelte';
 	import MenuDropdown from '$lib/menus/MenuDropdown.svelte';
 	import AgentFilePill from '../AgentFilePill.svelte';
@@ -11,6 +11,7 @@
 	import AgentCommandMenu from './AgentCommandMenu.svelte';
 	import AgentAddMenu from './AgentAddMenu.svelte';
 	import AgentContextUsage from './AgentContextUsage.svelte';
+	import { COMPACT_CHAT_MESSAGE } from './contextUsageMeter';
 	import { runsCommand } from '../../slashMatch';
 	import { attachedKey } from '../../attach/attached';
 	import { EditorSelection } from '../../attach/editorSelection.svelte';
@@ -30,7 +31,6 @@
 		takesSelection: boolean;
 		/** the agent takes images, so a pasted, dropped or picked one goes with the message */
 		takesImages: boolean;
-		/** null while the agent has not said, or never does */
 		usage: ContextUsage | null;
 		onSend: (text: string, attached: Attached | null, images: PastedImage[]) => void;
 		onStop: () => void;
@@ -163,7 +163,15 @@
 				</MenuDropdown>
 			{/each}
 			<span class="flex-1"></span>
-			{#if props.usage}<AgentContextUsage usage={props.usage} />{/if}
+			{#if props.usage}
+				<AgentContextUsage
+					usage={props.usage}
+					commands={props.commands}
+					working={props.working}
+					agent={props.agent}
+					onCompact={() => props.onSend(COMPACT_CHAT_MESSAGE, null, [])}
+				/>
+			{/if}
 			{#if props.working}
 				<button
 					class="btn-icon preset-tonal size-6 shrink-0 p-0"

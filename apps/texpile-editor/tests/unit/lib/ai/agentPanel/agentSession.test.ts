@@ -66,7 +66,6 @@ it("keeps the agent's last count of the context, and forgets it with the chat", 
 	session.receive({ type: 'state', state: 'ready' });
 	expect(session.usage).toBeNull();
 	session.receive({ type: 'update', update: { sessionUpdate: 'usage_update', used: 30_000, size: 200_000 } });
-	// one with nothing to measure leaves the last count standing
 	session.receive({ type: 'update', update: { sessionUpdate: 'usage_update', used: 31_000, size: 0 } });
 	expect(session.usage).toEqual({ used: 30_000, size: 200_000 });
 	expect(session.items).toEqual([]);

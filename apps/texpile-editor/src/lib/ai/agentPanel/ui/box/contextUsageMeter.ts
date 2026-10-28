@@ -1,18 +1,20 @@
-// the ring beside Send: how much of the agent's context the chat fills, and what its hint says
+import { Shrink } from '@lucide/svelte';
 import { m } from '$lib/paraglide/messages';
 import { getLocale } from '$lib/paraglide/runtime';
-import type { ContextUsage } from '../../agentPanel.types';
+import type { ContextMenuItem } from '$lib/menus/contextMenu.svelte';
+import type { AgentCommand, ContextUsage } from '../../agentPanel.types';
 
-/** from here on the agent is close to compacting the chat, so the ring warns */
-const NEARLY_FULL = 0.8;
+const CONTEXT_NEARLY_FULL = 0.8;
+const COMPACT_COMMAND = 'compact';
 
-/** from 0 to 1: an agent can count a little past its window */
+export const COMPACT_CHAT_MESSAGE = `/${COMPACT_COMMAND}`;
+
 export function contextShare(usage: ContextUsage): number {
 	return Math.min(1, usage.used / usage.size);
 }
 
 export function isContextNearlyFull(usage: ContextUsage): boolean {
-	return contextShare(usage) >= NEARLY_FULL;
+	return contextShare(usage) >= CONTEXT_NEARLY_FULL;
 }
 
 export function contextUsageLabel(usage: ContextUsage): string {
@@ -22,4 +24,24 @@ export function contextUsageLabel(usage: ContextUsage): string {
 		used: tokens.format(usage.used),
 		size: tokens.format(usage.size)
 	});
+}
+
+export function contextUsageMenu(
+	usage: ContextUsage,
+	commands: AgentCommand[],
+	working: boolean,
+	agent: string,
+	onCompact: () => void
+): ContextMenuItem[] {
+	const offered = commands.some((c) => c.name === COMPACT_COMMAND);
+	const tip = !offered
+		? m.agent_panel_compact_unavailable({ agent })
+		: working
+			? m.agent_panel_compact_busy({ agent })
+			: m.agent_panel_compact_note();
+	return [
+		{ label: contextUsageLabel(usage), disabled: true },
+		{ separator: true },
+		{ label: m.agent_panel_compact_now(), icon: Shrink, onclick: onCompact, disabled: !offered || working, tip }
+	];
 }
