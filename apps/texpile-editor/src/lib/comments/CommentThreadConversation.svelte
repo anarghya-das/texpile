@@ -1,7 +1,9 @@
 <script lang="ts">
 	// The open half of a panel row: the thread's messages, per-message edit, and the reply box.
 	import { tip } from '$lib/components/tooltip.svelte';
-	import { Trash2, Pencil } from '@lucide/svelte';
+	import { Trash2, Pencil, LoaderCircle, MessageSquareShare } from '@lucide/svelte';
+	import { agentThreads } from '$lib/ai/agentThreads.svelte';
+	import { AGENT_MENTION, addressed, handoffOf, mentionRuns, mentionsAgent } from '$lib/comments/agentMention';
 	import InitialAvatar from '$lib/components/InitialAvatar.svelte';
 	import type { Snippet } from 'svelte';
 	import type { CommentMessage, CommentThread } from '$lib/comments/log';
@@ -42,6 +44,22 @@
 	let draft = $state('');
 	let editing = $state<string | null>(null);
 	let editDraft = $state('');
+	// a reply in a thread the agent has a part in goes to it, until the reader takes the address away
+	let unaddressed = $state(false);
+	const agents = $derived(agentThreads.current);
+	const toAgent = $derived(!!agents?.available && agents.takesPart(thread) && !unaddressed);
+	const run = $derived(agents?.runs.get(thread.id));
+	const failed = $derived(agents?.failed.get(thread.id));
+	// the agent's longer messages fold to a few lines, as the card beside the page has room for
+	let unfolded = $state(new Set<string>());
+	function isLong(text: string): boolean {
+		return text.length > 280 || text.split('\n').length > 5;
+	}
+	function toggleFold(id: string): void {
+		const next = new Set(unfolded);
+		if (!next.delete(id)) next.add(id);
+		unfolded = next;
+	}
 
 	function saveEdit(msg: CommentMessage) {
 		const body = editDraft.trim();
@@ -50,11 +68,17 @@
 	}
 
 	async function submit() {
-		const body = draft.trim();
-		if (!body) return;
+		const typed = draft.trim();
+		if (!typed) return;
+		const body = toAgent ? addressed(typed) : typed;
 		draft = '';
 		// not sent, as when the name it needed was not given: the reply goes back in the box, unless more was typed
-		if ((await onReply(thread, body)) === null && !draft) draft = body;
+		if ((await onReply(thread, body)) === null) {
+			if (!draft) draft = typed;
+			return;
+		}
+		unaddressed = false;
+		if (mentionsAgent(body)) agents?.ask(thread.id);
 	}
 </script>
 
@@ -135,7 +159,25 @@
 							</p>
 						{/if}
 					{/if}
-					{#if msg.body}<p class="whitespace-pre-wrap">{msg.body}</p>{/if}
+					{#if msg.body}
+						{@const said = handoffOf(msg.body)}
+						{@const long = msg.by === agents?.name && isLong(said.text)}
+						<!-- nothing between the runs: inside pre-wrap, a space would show -->
+						<p class="whitespace-pre-wrap {long && !unfolded.has(msg.id) ? 'line-clamp-5' : ''}">
+							{#each mentionRuns(said.text) as part, j (j)}{#if part.mention}<span class="agent-mention">{part.text}</span
+									>{:else}{part.text}{/if}{/each}
+						</p>
+						{#if long}
+							<button class="text-muted hover:text-surface-950-50 text-xs underline" onclick={() => toggleFold(msg.id)}>
+								{unfolded.has(msg.id) ? m.agent_show_less() : m.agent_show_more()}
+							</button>
+						{/if}
+						{#if said.handoff && agents?.canHandOff}
+							<button class="btn btn-xs preset-tonal mt-1 gap-1" onclick={() => agents?.handOff(thread)}>
+								<MessageSquareShare class="size-3.5" />{m.agent_handoff()}
+							</button>
+						{/if}
+					{/if}
 				{/if}
 			</div>
 			{#if editing !== msg.id}
@@ -165,25 +207,50 @@
 			{/if}
 		</div>
 	{/each}
+	<!-- the agent at work on this thread, or why it is not -->
+	{#if run}
+		<div class="text-muted flex items-center gap-2 {dense ? '' : 'pl-7'}">
+			<LoaderCircle class="size-3 shrink-0 animate-spin" />
+			<span class="min-w-0 flex-1">{run.waiting ? m.agent_waiting({ agent: run.agent }) : m.agent_thinking({ agent: run.agent })}</span>
+			<button class="btn btn-xs hover:preset-tonal" onclick={() => agents?.cancel(thread.id)}>{m.agent_stop()}</button>
+		</div>
+	{:else if agents?.available && (failed !== undefined || agents.unanswered(thread))}
+		<div class="flex items-start gap-2 {dense ? '' : 'pl-7'}">
+			<p class="min-w-0 flex-1 {failed !== undefined ? 'text-error-ink' : 'text-muted'}">
+				{failed !== undefined ? m.agent_failed({ agent: agents.name ?? '', error: failed }) : m.agent_unanswered()}
+			</p>
+			<button class="btn btn-xs hover:preset-tonal shrink-0" onclick={() => agents?.ask(thread.id)}>{m.agent_retry()}</button>
+		</div>
+	{/if}
 	<!-- One line at rest, growing only once there is something in it, and the Reply
 	     button appears with the text. An empty box three rows tall under every thread
 	     was most of what made this panel feel like a form. pl-7 lines it up with the
 	     message bodies, past their avatars. -->
 	<div class="space-y-1.5 {dense ? '' : 'pl-7'}">
 		<div class="flex items-start gap-1">
-			<textarea
-				class="textarea min-w-0 flex-1 resize-none py-1 text-xs {draft.trim() ? 'min-h-14' : 'h-7 min-h-0'} rounded-container"
-				rows="1"
-				placeholder={m.comments_reply_placeholder()}
-				bind:value={draft}
-				onkeydown={(e) => {
-					// Enter sends, Shift+Enter breaks the line: a review reply is one or two
-					// sentences, so reaching for a button every time is the wrong default
-					if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
-						e.preventDefault();
-						submit();
-					}
-				}}></textarea>
+			<div class="textarea rounded-container flex min-w-0 flex-1 items-start gap-1 py-1 text-xs">
+				{#if toAgent}
+					<span class="agent-mention mt-px shrink-0">{AGENT_MENTION}</span>
+				{/if}
+				<textarea
+					class="min-w-0 flex-1 resize-none border-0 bg-transparent p-0 text-xs outline-none focus:ring-0 {draft.trim()
+						? 'min-h-12'
+						: 'h-5 min-h-0'}"
+					rows="1"
+					placeholder={toAgent ? m.agent_reply_placeholder() : m.comments_reply_placeholder()}
+					bind:value={draft}
+					onkeydown={(e) => {
+						// Enter sends, Shift+Enter breaks the line: a review reply is one or two
+						// sentences, so reaching for a button every time is the wrong default
+						if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
+							e.preventDefault();
+							submit();
+						} else if (e.key === 'Backspace' && toAgent && !draft) {
+							e.preventDefault();
+							unaddressed = true;
+						}
+					}}></textarea>
+			</div>
 			{#if footer}{@render footer()}{/if}
 		</div>
 		{#if draft.trim()}

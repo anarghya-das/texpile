@@ -14,6 +14,7 @@
 	import { attachedKey } from '../../attach/attached';
 	import { EditorSelection } from '../../attach/editorSelection.svelte';
 	import { ImageAttachments } from '../../attach/imageAttachments.svelte';
+	import { agentDraft } from '../../agentDraft.svelte';
 	import { tip } from '$lib/components/tooltip.svelte';
 	import { m } from '$lib/paraglide/messages';
 	import type { AgentCommand, Attached, ConfigOption, PastedImage } from '../../agentPanel.types';
@@ -54,6 +55,16 @@
 	});
 
 	const empty = $derived(!text.trim() && !images.list.length);
+
+	// a comment thread handed on: its words go in the box, after anything already typed there, to be read before sending
+	let input = $state<HTMLTextAreaElement | null>(null);
+	$effect(() => {
+		const draft = agentDraft.current;
+		if (draft === null || !input) return;
+		agentDraft.current = null;
+		text = text.trim() ? `${text.trimEnd()}\n\n${draft}` : draft;
+		input.focus();
+	});
 
 	function send(): void {
 		if (props.working || empty) return;
@@ -125,6 +136,7 @@
 			</div>
 		{/if}
 		<textarea
+			bind:this={input}
 			class="block field-sizing-content max-h-32 min-h-5 w-full resize-none bg-transparent text-sm leading-5 outline-none placeholder:text-[var(--field-placeholder)]"
 			rows="1"
 			placeholder={m.agent_panel_placeholder({ agent: props.agent })}

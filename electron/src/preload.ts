@@ -536,8 +536,10 @@ contextBridge.exposeInMainWorld('texpileAgent', {
 	detect: () => ipcRenderer.invoke('agent:detect') as Promise<Record<string, boolean>>,
 	/** the models a preset agent offers, asked of the agent */
 	models: (agent: 'claude' | 'codex' | 'agy') => ipcRenderer.invoke('agent:models', agent),
-	/** run an agent on a prompt, `system` holding the task's rules; resolves { ok, text } or { ok: false, error } */
-	run: (id: string, prompt: string, system: string, agent: string) => ipcRenderer.invoke('agent:run', { id, prompt, system, agent }),
+	/** run an agent on a prompt, `system` holding the task's rules; resolves { ok, text } or { ok: false, error }. `folder`:
+	 *  in this window's folder, able to read it but not change it, for an agent that allows that */
+	run: (id: string, prompt: string, system: string, agent: string, folder = false) =>
+		ipcRenderer.invoke('agent:run', { id, prompt, system, agent, folder }),
 	cancel: (id: string) => ipcRenderer.send('agent:cancel', id)
 });
 

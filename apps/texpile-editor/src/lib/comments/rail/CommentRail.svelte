@@ -24,6 +24,8 @@
 	import { stackRailItems, type RailBounds, type RailItem } from './railLayout';
 	import CommentCard from './CommentCard.svelte';
 	import CommentComposerCard from './CommentComposerCard.svelte';
+	import { agentThreads } from '$lib/ai/agentThreads.svelte';
+	import { mentionsAgent } from '$lib/comments/agentMention';
 	import { returnToCmText, returnToPmText } from './returnToText';
 	import { backdrop, clipEdge } from './railEdge';
 	import { m } from '$lib/paraglide/messages';
@@ -333,8 +335,11 @@
 		<CommentComposerCard
 			quote={pending.quote}
 			top={topOf(PENDING_ANCHOR)}
-			onSubmit={(body, keyed) => {
-				void ctl.commitAdd(body);
+			addressed={pending.agent}
+			agentReady={!!agentThreads.current?.available}
+			onSubmit={(body, keyed, action) => {
+				// the thread first, so the agent's answer has somewhere to go
+				void ctl.commitAdd(body).then((id) => id && mentionsAgent(body) && agentThreads.current?.ask(id, action));
 				if (!keyed) return;
 				if (mode === 'visual' && pmView) returnToPmText(pmView);
 				else if (mode === 'source' && cmView) returnToCmText(cmView);

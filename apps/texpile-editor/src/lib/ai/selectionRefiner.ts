@@ -13,11 +13,13 @@ import type { RefineAction } from './refineActions';
 import { refineAgentsOffered, refineTurnedOff } from './refineAgents.svelte';
 
 type AgentBridge = {
+	/** `folder`: in the window's folder, able to read it, for an agent readsFolder allows */
 	run(
 		id: string,
 		prompt: string,
 		system: string,
-		agent: RefineAgent
+		agent: RefineAgent,
+		folder?: boolean
 	): Promise<{ ok: true; text: string } | { ok: false; error: string; cancelled?: true }>;
 	cancel(id: string): void;
 	detect(): Promise<Record<PresetAgent, boolean>>;
@@ -34,6 +36,12 @@ export function isPresetAgent(v: string): v is PresetAgent {
 
 /** a preset, or the reader's own command line */
 export type RefineAgent = PresetAgent | 'custom';
+
+/** an agent main will run in the reader's folder, able to read it and kept from changing it (electron/src/ai/agentCommand.ts);
+ *  the others get the passage and the text around it alone */
+export function readsFolder(agent: RefineAgent): boolean {
+	return agent === 'claude' || agent === 'codex';
+}
 
 /** id '' is the agent's own default */
 export type AgentModel = { id: string; name: string; description: string };

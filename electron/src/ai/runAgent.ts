@@ -15,13 +15,17 @@ export type AgentResult = { ok: true; text: string } | { ok: false; error: strin
 export type AgentPrompt = { system: string; request: string };
 
 const TIMEOUT_MS = 180_000;
+// reading the folder takes turns of its own
+const FOLDER_TIMEOUT_MS = 300_000;
 const MOST_OUTPUT = 1 << 20;
 
+/** `cwd`: the reader's folder, for an agent that reads it (agentArgv's `folder`), rather than a run folder of its own */
 export async function runAgent(
 	argv: string[],
 	prompt: AgentPrompt,
 	signal: AbortSignal,
-	stdio: AgentStdio = agentStdio('')
+	stdio: AgentStdio = agentStdio(''),
+	cwd?: string
 ): Promise<AgentResult> {
 	await shellEnvReady();
 	const program = findProgram(argv[0]);
@@ -29,13 +33,16 @@ export async function runAgent(
 	const dir = makeRunFolder();
 	const answerFile = argv.includes(ANSWER_FILE) ? path.join(dir, 'answer.txt') : null;
 	const takesRules = argv.some((a) => a.includes(SYSTEM_FILE));
-	const args = argv.slice(1).map((a) => (a === ANSWER_FILE && answerFile ? answerFile : a.replaceAll(SYSTEM_FILE, 'system.txt')));
+	// the rules stay in the run's folder, out of the reader's
+	const systemFile = cwd ? path.join(dir, 'system.txt') : 'system.txt';
+	const timeout = cwd ? FOLDER_TIMEOUT_MS : TIMEOUT_MS;
+	const args = argv.slice(1).map((a) => (a === ANSWER_FILE && answerFile ? answerFile : a.replaceAll(SYSTEM_FILE, systemFile)));
 	const message = takesRules || !prompt.system ? prompt.request : `${prompt.system}\n\n${prompt.request}`;
 	return new Promise((resolve) => {
 		let child: ChildProcess;
 		try {
 			if (takesRules) fs.writeFileSync(path.join(dir, 'system.txt'), prompt.system, 'utf8');
-			child = startAgentProcess(program, args, dir);
+			child = startAgentProcess(program, args, cwd ?? dir);
 		} catch (e) {
 			removeRunFolder(dir);
 			return resolve({ ok: false, error: e instanceof Error ? e.message : String(e) });
@@ -52,9 +59,9 @@ export async function runAgent(
 			const said = lastLine(err) ?? lastLine(out);
 			stop({
 				ok: false,
-				error: `${argv[0]} did not answer within ${TIMEOUT_MS / 60_000} minutes${said ? `. Its last words: ${said}` : ''}`
+				error: `${argv[0]} did not answer within ${timeout / 60_000} minutes${said ? `. Its last words: ${said}` : ''}`
 			});
-		}, TIMEOUT_MS);
+		}, timeout);
 		function onAbort(): void {
 			stop({ ok: false, error: 'cancelled', cancelled: true });
 		}

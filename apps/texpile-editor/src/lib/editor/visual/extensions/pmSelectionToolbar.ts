@@ -8,6 +8,7 @@ import type { SelectionFormatButton } from '$lib/editor/selectionToolbarRow';
 import { settings } from '$lib/settings';
 import { observe } from '$lib/runes/observe.svelte';
 import { selectionToolbarRow } from '$lib/editor/selectionToolbarRow';
+import { agentThreads } from '$lib/ai/agentThreads.svelte';
 import type { CommentAnchor } from '$lib/comments/anchor';
 import { visibleBox } from '../visibleBox';
 import { setPmCommentPending, type SourceAnchorFn } from './pmComments';
@@ -72,9 +73,11 @@ export function pmSelectionToolbar(onAdd: (anchor: CommentAnchor | null) => void
 		view(view) {
 			const row = selectionToolbarRow(
 				label,
-				() => {
+				(agent) => {
 					const sel = view.state.selection;
 					if (!(sel instanceof TextSelection) || sel.empty) return;
+					// the agent's composer finds the selection and marks it itself, the same in either editor
+					if (agent) return void agentThreads.current?.compose();
 					const anchor = sourceAnchor(view.state.doc, sel.from, sel.to);
 					onAdd(anchor);
 					// the composer is about to take focus and the browser will hide the native
@@ -138,7 +141,7 @@ export function pmSelectionToolbar(onAdd: (anchor: CommentAnchor | null) => void
 				// above the line, else below it when the selection starts at the top of the pane
 				const top = anchor.top - HEIGHT - 6 >= pane.top + 4 ? anchor.top - HEIGHT - 6 : anchor.bottom + 6;
 				row.sync({ format: formatting, comment: commenting });
-				// display before measuring: offsetWidth is 0 while the row is hidden, and Refine changes its width
+				// display before measuring: offsetWidth is 0 while the row is hidden, and Ask agent changes its width
 				dom.style.display = 'flex';
 				const half = (dom.offsetWidth || 48) / 2;
 				dom.style.top = `${top}px`;

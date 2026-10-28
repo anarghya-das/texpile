@@ -1049,6 +1049,14 @@ html.pm-drop-refused .pm-drop-cursor {
 .comment-card-pending {
 	z-index: 5;
 }
+/* "@agent" in a comment, the composer and a reply box: the agent addressed, as a mention in a chat */
+.agent-mention {
+	border-radius: 4px;
+	padding: 0 3px;
+	white-space: nowrap;
+	color: var(--color-primary-700-300);
+	background-color: color-mix(in srgb, var(--color-primary-500) 16%, transparent);
+}
 @media (prefers-reduced-motion: reduce) {
 	.comment-card {
 		transition: none;

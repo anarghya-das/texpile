@@ -1,12 +1,11 @@
-// The buttons over a selection, the same in both editors: Comment, Refine when an agent is set up, and the control that
-// turns the row off; in a split layout the visual editor puts formatting in front. Each editor places the row itself
-// (cmSelectionToolbar, pmSelectionToolbar)
+// The buttons over a selection, the same in both editors: Comment, Ask agent when an agent is set up, and the control
+// that turns the row off; in a split layout the visual editor puts formatting in front. Each editor places the row
+// itself (cmSelectionToolbar, pmSelectionToolbar)
 import { updateSettings } from '$lib/settings';
 import { m } from '$lib/paraglide/messages';
 import { tip } from '$lib/components/tooltip.svelte';
-import { agentName, refiner } from '$lib/ai/selectionRefiner';
-import { refineAgentsOffered } from '$lib/ai/refineAgents.svelte';
-import { openRefineCard } from '$lib/ai/refineCardState.svelte';
+import { refiner } from '$lib/ai/selectionRefiner';
+import { agentThreads } from '$lib/ai/agentThreads.svelte';
 import { openPreferencesAt } from '$lib/stores/dialogStore';
 
 function svgIcon(body: string) {
@@ -25,13 +24,14 @@ export type SelectionToolbarParts = { format: boolean; comment: boolean };
 
 export type SelectionToolbarRow = {
 	dom: HTMLDivElement;
-	/** shows Refine when an agent is set up here; called whenever the row is placed */
+	/** shows Ask agent when an agent is set up here; called whenever the row is placed */
 	sync(parts?: SelectionToolbarParts): void;
 };
 
+/** `comment(agent)`: begin a comment on the selection, addressed to the agent when `agent` */
 export function selectionToolbarRow(
 	commentLabel: string,
-	comment: () => void,
+	comment: (agent: boolean) => void,
 	hide: () => void,
 	formatting: SelectionFormatButton[] = []
 ): SelectionToolbarRow {
@@ -55,10 +55,9 @@ export function selectionToolbarRow(
 		return b;
 	}
 	const format = formatting.map((f) => ({ f, b: button(f.label, f.svg, '', () => f.run()) }));
-	const commentButton = button(commentLabel, COMMENT_ICON, '', comment);
-	const refine = button('', REFINE_ICON, '', (b) =>
-		refiner.current?.needsAgent ? openPreferencesAt('ai') : openRefineCard(b.getBoundingClientRect())
-	);
+	const commentButton = button(commentLabel, COMMENT_ICON, '', () => comment(false));
+	// a comment addressed to the agent, which answers in the thread or suggests the change asked for
+	const ask = button('', REFINE_ICON, '', () => (refiner.current?.needsAgent ? openPreferencesAt('ai') : comment(true)));
 	const off = button(m.comments_pill_off(), X_ICON, ' cm-comment-add-off', () => {
 		updateSettings({ commentPill: false });
 		hide(); // the setting keeps it off; this is only so it leaves under the pointer
@@ -74,13 +73,11 @@ export function selectionToolbarRow(
 			commentButton.classList.toggle('cm-comment-add-gap', parts.format && format.length > 0);
 			dom.classList.toggle('cm-comment-add-card', parts.format && format.length > 0);
 			const r = refiner.current;
-			refine.hidden = !parts.comment || (!r?.available && !r?.needsAgent);
-			refine.disabled = !!r?.busy;
-			// named for its agent; without one, for the way to pick it
-			const offered = refineAgentsOffered();
-			const title = offered.length === 1 ? m.ai_refine_menu({ agent: agentName(offered[0]) }) : m.ai_refine_setup();
-			refine.setAttribute('aria-label', title);
-			hints.get(refine)?.update(title);
+			ask.hidden = !parts.comment || (!agentThreads.current?.available && !r?.needsAgent);
+			// without an agent, named for the way to pick one
+			const title = r?.needsAgent ? m.ai_refine_setup() : m.agent_ask();
+			ask.setAttribute('aria-label', title);
+			hints.get(ask)?.update(title);
 		}
 	};
 }

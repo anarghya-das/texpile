@@ -93,9 +93,10 @@ export class CommentsController {
 	 * message turns it into a real thread.
 	 *
 	 * Two shapes: source-mode offsets into `text` (the anchor is built at commit), or a ready-made
-	 * anchor from the visual editor, whose positions mean nothing here.
+	 * anchor from the visual editor, whose positions mean nothing here. `agent`: begun as a question
+	 * to the agent, so the composer opens addressed to it.
 	 */
-	pending = $state<{ quote: string; from?: number; to?: number; anchor?: CommentAnchor } | null>(null);
+	pending = $state<{ quote: string; from?: number; to?: number; anchor?: CommentAnchor; agent?: boolean } | null>(null);
 
 	/** workspace-relative path of the file `ranges` was computed against */
 	private file: string | null = null;
@@ -331,11 +332,11 @@ export class CommentsController {
 	 * window pointed into a document that no longer existed; the anchor's quote and context
 	 * survive it, exactly as the visual editor's ready-made anchors do.
 	 */
-	beginAdd(from: number, to: number): void {
+	beginAdd(from: number, to: number, agent = false): void {
 		if (!this.file || to <= from) return;
 		const text = this.fresh();
 		if (to > text.length) return;
-		this.pending = { from, to, quote: text.slice(from, to), anchor: buildAnchor(text, from, to) };
+		this.pending = { from, to, quote: text.slice(from, to), anchor: buildAnchor(text, from, to), ...(agent ? { agent } : {}) };
 		this.selected = null;
 	}
 
@@ -353,14 +354,15 @@ export class CommentsController {
 		this.pending = null;
 	}
 
-	/** turn the pending selection into a thread; no-op if there is nothing to write */
-	async commitAdd(body: string): Promise<void> {
+	/** turn the pending selection into a thread, resolving its id; null if there was nothing to write */
+	async commitAdd(body: string): Promise<string | null> {
 		const p = this.pending;
-		if (!p) return;
+		if (!p) return null;
 		this.pending = null;
-		if (!p.anchor || !this.file) return;
+		if (!p.anchor || !this.file) return null;
 		const id = await this.openOn(this.file, p.anchor, body);
 		if (id) this.selected = id;
+		return id;
 	}
 
 	/**

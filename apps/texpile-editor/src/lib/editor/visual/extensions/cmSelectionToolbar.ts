@@ -4,6 +4,7 @@ import type { Extension } from '@codemirror/state';
 import { settings } from '$lib/settings';
 import { observe } from '$lib/runes/observe.svelte';
 import { selectionToolbarRow, type SelectionToolbarRow } from '$lib/editor/selectionToolbarRow';
+import { agentThreads } from '$lib/ai/agentThreads.svelte';
 import { visibleBox } from '../visibleBox';
 
 /** the row fades in rather than flashing under the pointer for every drag it passes through */
@@ -37,11 +38,13 @@ export function cmSelectionToolbar(onAdd: (from: number, to: number) => void, la
 			constructor(private readonly view: EditorView) {
 				this.row = selectionToolbarRow(
 					label,
-					() => {
+					(agent) => {
 						const sel = view.state.selection.main;
 						if (sel.empty) return;
 						this.added = { from: sel.from, to: sel.to };
-						onAdd(sel.from, sel.to);
+						// the agent's composer finds the selection itself, the same in either editor
+						if (agent) void agentThreads.current?.compose();
+						else onAdd(sel.from, sel.to);
 						this.hide();
 					},
 					() => this.hide()

@@ -10,7 +10,8 @@ export const PRESET_AGENTS: PresetAgent[] = ['claude', 'codex', 'agy'];
 /** where an agent that writes its answer to a file (rather than stdout) is told to put it */
 export const ANSWER_FILE = '{answer}';
 /** a file holding the rules of the task, for an agent that takes them in place of its own instructions. Written into the
- * run's folder, which the agent runs in, so the name alone reaches it and no path needs quoting */
+ * run's folder, which the agent runs in, so the name alone reaches it and no path needs quoting; an agent run in the
+ * reader's folder is given the whole path */
 export const SYSTEM_FILE = '{system}';
 
 const CODEX_TOOL_FEATURES = [
@@ -39,6 +40,17 @@ const CODEX_SETTINGS = [
 	'include_permissions_instructions=false',
 	'include_apps_instructions=false',
 	...CODEX_TOOL_FEATURES.map((feature) => `features.${feature}=false`)
+];
+
+// the commands Codex reads a folder with, which its read-only sandbox lets run and keeps from writing
+const CODEX_READING = ['shell_tool', 'unified_exec'];
+
+// in the reader's folder Codex keeps its notes on where it is and what its sandbox allows, and the commands it reads with
+const CODEX_FOLDER_SETTINGS = [
+	`model_instructions_file='${SYSTEM_FILE}'`,
+	`experimental_instructions_file='${SYSTEM_FILE}'`,
+	'include_apps_instructions=false',
+	...CODEX_TOOL_FEATURES.filter((feature) => !CODEX_READING.includes(feature)).map((feature) => `features.${feature}=false`)
 ];
 
 const PRESETS: Record<PresetAgent, string[]> = {
@@ -75,6 +87,46 @@ const PRESETS: Record<PresetAgent, string[]> = {
 	agy: ['agy', '--input-format', 'stream-json', '--output-format', 'stream-json', '--disable-slash-commands']
 };
 
+/**
+ * The same agents run in the reader's folder, able to read it and nothing more, for an answer that needs the rest of
+ * the project: the bibliography, the macros, the other sections. Claude gets its reading tools alone, and not the
+ * folder's own .claude settings, whose hooks a project someone else wrote could point at anything. Codex reads with
+ * commands its read-only sandbox runs. Antigravity and a custom command have no such switch, so they stay out
+ */
+const FOLDER_PRESETS: Partial<Record<PresetAgent, string[]>> = {
+	claude: [
+		'claude',
+		'-p',
+		'--tools',
+		'Read,Grep,Glob',
+		'--strict-mcp-config',
+		'--setting-sources',
+		'user',
+		'--no-session-persistence',
+		'--output-format',
+		'text',
+		'--system-prompt-file',
+		SYSTEM_FILE
+	],
+	codex: [
+		'codex',
+		'exec',
+		'--skip-git-repo-check',
+		'--ephemeral',
+		'--sandbox',
+		'read-only',
+		'--output-last-message',
+		ANSWER_FILE,
+		...CODEX_FOLDER_SETTINGS.flatMap((setting) => ['-c', setting]),
+		'-'
+	]
+};
+
+/** an agent that can be run in the reader's folder without being able to change it */
+export function readsFolder(choice: unknown): boolean {
+	return FOLDER_PRESETS[choice as PresetAgent] !== undefined;
+}
+
 /** where --model goes: Codex takes it after exec, which has options of its own */
 const MODEL_AT: Record<PresetAgent, number> = { claude: 1, codex: 2, agy: 1 };
 
@@ -104,12 +156,14 @@ export function splitCommandLine(line: string): string[] {
 	return out;
 }
 
-/** the program and its arguments, or null when no agent is set. A custom command names its own model */
-export function agentArgv(choice: unknown, custom: unknown, model?: unknown): string[] | null {
+/** the program and its arguments, or null when no agent is set. A custom command names its own model. `folder`: the
+ * command that reads the reader's folder, for an agent that has one (readsFolder) */
+export function agentArgv(choice: unknown, custom: unknown, model?: unknown, folder = false): string[] | null {
 	if (PRESET_AGENTS.includes(choice as PresetAgent)) {
-		const argv = [...PRESETS[choice as PresetAgent]];
+		const preset = choice as PresetAgent;
+		const argv = [...((folder && FOLDER_PRESETS[preset]) || PRESETS[preset])];
 		// one word with "=", so a model name can never read as a flag of its own
-		if (typeof model === 'string' && model) argv.splice(MODEL_AT[choice as PresetAgent], 0, `--model=${model}`);
+		if (typeof model === 'string' && model) argv.splice(MODEL_AT[preset], 0, `--model=${model}`);
 		return argv;
 	}
 	if (choice !== 'custom' || typeof custom !== 'string') return null;

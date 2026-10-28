@@ -99,7 +99,17 @@
 		fileHistory: () => session.collabFor(doc.path)?.undo ?? null
 	});
 	const commentsCtl = commentsW.ctl;
-	wireRefiner({ comments: commentsW, doc, modes, kind: () => kind, guest: () => guest });
+	wireRefiner({
+		comments: commentsW,
+		doc,
+		modes,
+		kind: () => kind,
+		guest: () => guest,
+		showAgentTab: () => {
+			termDock.show();
+			dockView = 'agent';
+		}
+	});
 	// an outside write adopted into the open file (an agent, vim) re-places its threads now, so a
 	// rewritten quote badges detached at once rather than at the next mode switch
 	external.onAdopted = (text) => void commentsW.adoptDisk(text);
